@@ -1,0 +1,109 @@
+import os
+from collections.abc import Generator
+from unittest.mock import MagicMock, patch
+
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
+
+from app.config import settings
+from app.db import models  # noqa: F401 - registers models on Base.metadata
+from app.db.database import Base, get_db
+from app.limiter import limiter
+from app.main import app
+
+SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///:memory:"
+
+test_engine = create_engine(
+    SQLALCHEMY_TEST_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+
+_MISSING_ENV_VALUE = object()
+_CAPABILITY_DEFAULTS = {
+    "REWRITE_ENABLED": False,
+    "CONTRIBUTIONS_ENABLED": False,
+    "ADMIN_API_ENABLED": False,
+    "GROQ_API_KEY": None,
+    "ADMIN_API_KEY": None,
+}
+
+
+@pytest.fixture(autouse=True)
+def isolate_capability_settings():
+    original_environment = {
+        name: os.environ.get(name, _MISSING_ENV_VALUE) for name in _CAPABILITY_DEFAULTS
+    }
+    original_settings = {name: getattr(settings, name) for name in _CAPABILITY_DEFAULTS}
+
+    for name, default in _CAPABILITY_DEFAULTS.items():
+        os.environ.pop(name, None)
+        setattr(settings, name, default)
+
+    try:
+        yield
+    finally:
+        for name, value in original_settings.items():
+            setattr(settings, name, value)
+        for name, value in original_environment.items():
+            if value is _MISSING_ENV_VALUE:
+                os.environ.pop(name, None)
+            else:
+                os.environ[name] = value
+
+
+@pytest.fixture(autouse=True)
+def disable_limiter():
+    limiter.enabled = False
+    yield
+    limiter.enabled = True
+
+
+@pytest.fixture(scope="function")
+def db_session() -> Generator:
+    Base.metadata.create_all(bind=test_engine)
+    session = TestingSessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
+        Base.metadata.drop_all(bind=test_engine)
+
+
+@pytest.fixture(scope="function")
+def client(db_session: Generator) -> Generator:
+    def override_get_db():
+        try:
+            yield db_session
+        finally:
+            pass
+
+    app.dependency_overrides[get_db] = override_get_db
+    with TestClient(app) as test_client:
+        yield test_client
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def mock_groq():
+    """Mock Groq client trả JSON với edits rỗng.
+
+    Test cụ thể có thể đổi `chat.completions.create.return_value.choices[0].message.content`
+    để trả edits hoặc raise lỗi.
+    """
+    with patch("app.services.rewriter.Groq") as mock_client_cls:
+        mock_client_instance = MagicMock()
+
+        mock_choice = MagicMock()
+        mock_choice.message.content = '{"edits": []}'
+
+        mock_completion = MagicMock()
+        mock_completion.choices = [mock_choice]
+
+        mock_client_instance.chat.completions.create.return_value = mock_completion
+        mock_client_cls.return_value = mock_client_instance
+        yield mock_client_instance

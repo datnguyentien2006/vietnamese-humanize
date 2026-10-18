@@ -1,0 +1,612 @@
+schema_version: '1.0'
+patterns:
+- id: VI-STY-P01
+  name: xung-ho-khong-nhat-quan
+  skill: style-guide-vi
+  category: pronouns
+  finding_type: warning
+  scope: document
+  aggregation: consistency
+  severity: medium
+  confidence: medium
+  summary: Trộn nhiều cách gọi độc giả hoặc người viết mà chưa có lý do chức năng.
+  signals:
+    regex:
+    - \b(?:bạn|quý khách|người dùng|khách hàng|chúng tôi|chúng ta)\b
+  why_it_matters: Đại từ thể hiện quan hệ xã hội; đổi qua lại có thể làm giọng và đối tượng không ổn định.
+  rewrite_strategy:
+  - Xác định quan hệ với độc giả rồi lập bảng cách gọi; giữ thuật ngữ phân tích khi nó có chức năng riêng.
+  bad_examples:
+  - text: Bạn chọn gói. Sau đó quý khách xác nhận địa chỉ.
+    reason: Cùng một độc giả nhưng đổi cách gọi.
+  - text: Chúng tôi sẽ hướng dẫn; sau đó chúng ta xử lý yêu cầu của bạn.
+    reason: Phạm vi "chúng ta" không rõ.
+  good_examples:
+  - mode: clean_rewrite
+    text: Bạn chọn gói rồi xác nhận địa chỉ.
+    context: Style guide quy định gọi độc giả là “bạn”.
+  - mode: needs_author_decision
+    text: Cần xác nhận “chúng ta” có bao gồm người đọc hay chỉ phía “chúng tôi” trước khi sửa câu.
+  - mode: no_change
+    text: Bạn có thể mời người dùng mới vào workspace.
+    reason: Bạn gọi độc giả, còn người dùng là đối tượng được nói tới.
+  exceptions:
+  - Khi "người dùng" hoặc "khách hàng" là đối tượng phân tích còn "bạn" là lời gọi trực tiếp, hoặc trích dẫn nhiều người
+    nói. Không suy ra thiếu nhất quán chỉ vì hai cụm cùng xuất hiện.
+  false_positive_risk: high
+  tags:
+  - dai-tu
+  - register
+  - nhat-quan
+  min_occurrences: 3
+- id: VI-STY-P02
+  name: chung-ta-ep-dong-thuan
+  skill: style-guide-vi
+  category: pronouns
+  finding_type: warning
+  scope: sentence
+  aggregation: single
+  severity: low
+  confidence: medium
+  summary: Dùng "chúng ta đều" để trình bày một nhận định như thể người đọc đã đồng ý.
+  signals:
+    regex:
+    - \bchúng ta (?:đều|ai cũng) (?:biết|hiểu|thừa nhận|đồng ý)\b
+  why_it_matters: Cách xưng hô nhập người đọc vào lập trường của tác giả và che nhu cầu đưa bằng chứng.
+  rewrite_strategy:
+  - Nêu nhận định và căn cứ trực tiếp; chỉ dùng "chúng ta" khi nhóm bao gồm người đọc thật sự rõ.
+  bad_examples:
+  - text: Chúng ta đều biết AI sẽ thay đổi mọi ngành.
+    reason: Ép đồng thuận cho một dự báo rộng.
+  - text: Chúng ta ai cũng hiểu quy trình này rất đơn giản.
+    reason: Có thể làm người chưa hiểu cảm thấy bị loại trừ.
+  good_examples:
+  - mode: clean_rewrite
+    text: AI sẽ thay đổi mọi ngành.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  - mode: clean_rewrite
+    text: Quy trình này rất đơn giản.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  exceptions:
+  - Lời nói trong nhóm đã có đồng thuận hoặc hoạt động hướng dẫn thật sự cùng làm.
+  false_positive_risk: medium
+  tags:
+  - dai-tu
+  - lap-truong
+  min_occurrences: 1
+- id: VI-STY-T01
+  name: login-dang-nhap-lan-lon
+  skill: style-guide-vi
+  category: terminology
+  finding_type: warning
+  scope: document
+  aggregation: consistency
+  severity: low
+  confidence: medium
+  summary: Trộn "login", "log in" và "đăng nhập" cho cùng một thao tác trong nội dung người dùng.
+  signals:
+    regex:
+    - \b(?:login|log in|đăng nhập)\b
+  why_it_matters: Biến thể thuật ngữ gây khó tìm kiếm và làm UI không khớp tài liệu.
+  rewrite_strategy:
+  - Theo glossary hoặc nhãn UI; không đổi tên API, command hay identifier.
+  bad_examples:
+  - text: Chọn Login, sau đó đăng nhập bằng email để log in.
+    reason: Ba dạng chỉ cùng một thao tác.
+  - text: Nếu login lỗi, hãy mở lại trang Đăng nhập.
+    reason: Nội dung người dùng trộn Anh-Việt không có lý do.
+  good_examples:
+  - mode: clean_rewrite
+    text: Chọn Đăng nhập, sau đó đăng nhập bằng email.
+    context: Style guide quy định nhãn UI là “Đăng nhập”.
+  - mode: clean_rewrite
+    text: Nếu đăng nhập lỗi, hãy mở lại trang Đăng nhập.
+    context: Style guide quy định dùng “đăng nhập” trong nội dung người dùng.
+  exceptions:
+  - Khi phân biệt nhãn UI, endpoint, sự kiện analytics hoặc trích dẫn nguyên văn.
+  false_positive_risk: high
+  tags:
+  - thuat-ngu
+  - ui
+  - tieng-anh
+  min_occurrences: 2
+- id: VI-STY-T02
+  name: viet-tat-chua-giai-thich
+  skill: style-guide-vi
+  category: terminology
+  finding_type: warning
+  scope: document
+  aggregation: single
+  severity: low
+  confidence: low
+  summary: Từ viết tắt in hoa xuất hiện trong nội dung phổ thông mà có thể chưa được giải thích.
+  signals:
+    regex:
+    - (?<![A-Z0-9])[A-ZĐ]{3,6}(?![A-Z0-9])
+    exclude_phrases:
+    - API
+    - URL
+    - HTTP
+    - HTTPS
+    - JSON
+    - HTML
+    - CSS
+    - SQL
+    - CPU
+    - RAM
+    - PDF
+    - CSV
+    - SDK
+    - CLI
+    - UI
+    - UX
+    - UTC
+    - ICT
+    - GB
+    - MB
+    - SSD
+    - HDD
+    - USB
+    - GPS
+    - VPN
+    - DNS
+    - FTP
+    - SSH
+    - IDE
+    - ORM
+    - CMS
+    - CDN
+    - AWS
+    - GCP
+    - SEO
+    - SEM
+    - CRM
+    - ERP
+    - SaaS
+    - IaaS
+    - PaaS
+    - XML
+    - YAML
+    - TOML
+    - REST
+    - SOAP
+    - CRUD
+    - ACID
+    - CORS
+    - CSRF
+    - DDOS
+    - SMTP
+    - IMAP
+    - POP
+    - TCP
+    - UDP
+    - IoT
+    - NFC
+    - RFID
+    - LTE
+    - APP
+    - APK
+    - JPEG
+    - PNG
+    - GIF
+    - SVG
+    - MP3
+    - MP4
+    - IPv4
+    - IPv6
+    - WIFI
+    - QR
+    - CEO
+    - CTO
+    - CFO
+    - COO
+    - CMO
+    - KPI
+    - OKR
+    - ROI
+    - B2B
+    - B2C
+    - MVP
+    - IPO
+    - PR
+    - ISO
+    - GDPR
+    - HIPAA
+    - PCI
+    - SOC
+    - OWASP
+    - IELTS
+    - TOEFL
+    - TOEIC
+    - GPA
+    - PhD
+    - MBA
+    - WHO
+    - UNESCO
+    - UNICEF
+    - NATO
+    - ASEAN
+    - WTO
+    - IMF
+    - UBND
+    - UBMT
+    - HĐND
+    - CSGT
+    - BHXH
+    - BHYT
+    - BHTN
+    - CMND
+    - CCCD
+    - GPLX
+    - ĐKKD
+    - GPKD
+    - QĐND
+    - QLNN
+    - TTHC
+    - NGAY
+    - MUA
+    - XEM
+    - TẢI
+    - GỌI
+    - GỬI
+    - ĐÂY
+    - NÀY
+    - HOT
+    - MỚI
+    - FREE
+    - SALE
+    - MIỄN
+    - GIẢM
+    - TẶNG
+    - ĐẶT
+    - NÉN
+    - LỚN
+    - KHỦNG
+    - SỐC
+    - SIÊU
+    - NHANH
+    - LIỀN
+    - CLICK
+    - BẤM
+    - ĐĂNG
+    - NHẬP
+    - THỬ
+    - DÙNG
+  why_it_matters: Độc giả mới có thể không biết viết tắt, nhưng nhiều từ đã quá quen trong từng domain.
+  rewrite_strategy:
+  - Giải thích ở lần đầu theo glossary; bỏ qua tên sản phẩm, đơn vị và từ viết tắt phổ biến với độc giả.
+  bad_examples:
+  - text: SLA sẽ được rà trong cuộc họp mà không có giải thích trước đó.
+    reason: Độc giả mới có thể không biết SLA.
+  - text: Nhóm dùng RTO để quyết định phương án khôi phục.
+    reason: Thuật ngữ chưa được mở rộng trong tài liệu phổ thông.
+  good_examples:
+  - mode: clean_rewrite
+    text: Thỏa thuận mức dịch vụ (SLA) sẽ được rà trong cuộc họp.
+    context: Glossary định nghĩa SLA là “thỏa thuận mức dịch vụ”.
+  - mode: clean_rewrite
+    text: Mục tiêu thời gian khôi phục (RTO) được dùng để quyết định phương án khôi phục.
+    context: Glossary định nghĩa RTO là “mục tiêu thời gian khôi phục”.
+  - mode: no_change
+    text: Thỏa thuận mức dịch vụ (SLA) được nêu ở đầu. SLA vẫn được rà trong cuộc họp.
+    reason: Lần xuất hiện sau đã có định nghĩa trước đó trong cùng tài liệu.
+  exceptions:
+  - Từ viết tắt quen thuộc với độc giả, tên sản phẩm, đơn vị, code, bảng glossary, nội dung chuyên
+    gia, hoặc acronym đã được giải thích trước đó trong cùng tài liệu.
+  false_positive_risk: high
+  tags:
+  - viet-tat
+  - doc-gia
+  min_occurrences: 1
+  case_sensitive: true
+- id: VI-STY-C01
+  name: viet-hoa-danh-tu-chung
+  skill: style-guide-vi
+  category: capitalization
+  finding_type: preference
+  scope: token
+  aggregation: single
+  severity: low
+  confidence: low
+  summary: Danh từ chung, khái niệm trừu tượng, chức danh hoặc đại từ bị viết hoa giữa câu để tạo vẻ trang trọng.
+  signals:
+    phrases:
+    - Khách Hàng
+    - Sản Phẩm
+    - Giải Pháp
+    - Dịch Vụ
+    - Báo Cáo
+    - Kế Hoạch
+    - Chiến Lược
+    - Quy Trình
+    - Phương Pháp
+    - Công Nghệ
+    - Dự Án
+    - Đối Tác
+    - Thị Trường
+    - Doanh Nghiệp
+    - Trải Nghiệm
+    - Hành Trình
+    - Giá Trị
+    - Tầm Nhìn
+    - Sứ Mệnh
+    - Sự Thật
+    - Niềm Tin
+    - Cảm Hứng
+    - Đam Mê
+    - Khát Vọng
+    - Giám Đốc
+    - Trưởng Phòng
+    - Nhân Viên
+    - Quản Lý
+    - Chúng Tôi
+    - Quý Khách
+    - Trí Tuệ Nhân Tạo
+    - Học Máy
+    - Khoa Học Dữ Liệu
+    - Kinh Tế Số
+  why_it_matters: Viết hoa không theo chức năng làm văn bản thiếu nhất quán và mang giọng quảng cáo hoặc dịch máy.
+  rewrite_strategy:
+  - Viết thường danh từ chung, trừ tên riêng, thuật ngữ pháp lý đã định nghĩa hoặc style thương hiệu.
+  bad_examples:
+  - text: Chúng tôi cung cấp Giải Pháp cho mọi Khách Hàng.
+    reason: Danh từ chung được viết hoa cơ học.
+  - text: Sản Phẩm này đi kèm Dịch Vụ bảo hành.
+    reason: Không phải tên riêng.
+  good_examples:
+  - mode: clean_rewrite
+    text: Chúng tôi cung cấp giải pháp cho mọi khách hàng.
+  - mode: clean_rewrite
+    text: Sản phẩm này đi kèm dịch vụ bảo hành.
+  exceptions:
+  - Tên thương hiệu, nhãn UI, thuật ngữ đã định nghĩa trong hợp đồng hoặc style guide yêu cầu.
+  false_positive_risk: high
+  tags:
+  - viet-hoa
+  - danh-tu-chung
+  min_occurrences: 2
+  case_sensitive: true
+- id: VI-STY-C02
+  name: title-case-nhiem-tieng-anh
+  skill: style-guide-vi
+  category: capitalization
+  finding_type: preference
+  scope: document
+  aggregation: count
+  severity: low
+  confidence: low
+  summary: Hai hoặc nhiều cụm từ viết hoa chữ đầu (Title Case) xuất hiện giữa câu, dấu hiệu nhiễm quy ước tiếng Anh hoặc over-generalize viết hoa để nhấn mạnh.
+  signals:
+    regex:
+    - '(?!)'
+  why_it_matters: >-
+    Tiếng Anh viết hoa chữ đầu mọi từ trong title ("Product Roadmap Q3") và
+    trong marketing copy ("Our Solution"). Khi AI sinh tiếng Việt, nó áp luôn
+    convention đó. Người viết tiếng Việt tự nhiên chỉ viết hoa tên riêng và
+    chữ đầu câu.
+  rewrite_strategy:
+  - Viết thường các cụm Title Case giữa câu, trừ khi là tên riêng.
+  - Nếu cụm là tiêu đề thực sự, chuyển thành heading Markdown thay vì viết hoa giữa câu.
+  bad_examples:
+  - text: Chúng tôi tập trung vào Trải Nghiệm Người Dùng và Tầm Nhìn Chiến Lược.
+    reason: Hai cụm Title Case giữa câu.
+  - text: Công ty cam kết về Chất Lượng Dịch Vụ, Đội Ngũ Chuyên Nghiệp và Đổi Mới Sáng Tạo.
+    reason: Ba cụm Title Case giữa câu.
+  good_examples:
+  - mode: clean_rewrite
+    text: Chúng tôi tập trung vào trải nghiệm người dùng và tầm nhìn chiến lược.
+    reason: Viết thường các cụm danh từ chung.
+  - mode: no_change
+    text: Tôi đi từ Hà Nội đến Hồ Chí Minh tuần trước.
+    reason: Các cụm là tên riêng địa danh.
+  - mode: no_change
+    text: Đoạn văn có nhiều câu. Báo Cáo Kinh Doanh là từ viết hoa ở đầu câu thứ hai.
+    reason: Cụm Title Case nằm ở đầu câu, không tính.
+  exceptions:
+  - Tên riêng, địa danh, quốc gia, tổ chức.
+  - Tiêu đề Markdown bắt đầu bằng dấu #.
+  - Đoạn văn trong ngoặc kép hoặc code block.
+  - Trích dẫn nguyên văn từ tiếng Anh.
+  false_positive_risk: high
+  tags:
+  - viet-hoa
+  - title-case
+  - translationese
+  min_occurrences: 2
+- id: VI-STY-N01
+  name: don-vi-khong-co-khoang-trang
+  skill: style-guide-vi
+  category: numbers
+  finding_type: preference
+  scope: token
+  aggregation: single
+  severity: low
+  confidence: medium
+  summary: Số và ký hiệu đơn vị viết liền trong văn bản khi style dự án yêu cầu một khoảng trắng.
+  signals:
+    regex:
+    - \b\d+(?:[.,]\d+)?(?:km|cm|mm|kg|mg|GB|MB|ms|°C)\b
+  why_it_matters: Cách viết đơn vị không thống nhất làm bảng và tài liệu khó quét.
+  rewrite_strategy:
+  - Theo style guide; mặc định thêm một khoảng trắng giữa số và đơn vị trong văn bản.
+  bad_examples:
+  - text: Tệp có dung lượng 5GB.
+    reason: Thiếu khoảng trắng theo default của dự án.
+  - text: Mẫu được giữ ở 4°C.
+    reason: Cách biểu diễn cần nhất quán với các số đo khác.
+  good_examples:
+  - mode: clean_rewrite
+    text: Tệp có dung lượng 5 GB.
+  - mode: clean_rewrite
+    text: Mẫu được giữ ở 4 °C.
+  exceptions:
+  - Nhãn UI thiếu chỗ, quy ước ngành, code, identifier hoặc style guide yêu cầu viết liền.
+  false_positive_risk: medium
+  tags:
+  - don-vi
+  - khoang-trang
+  min_occurrences: 1
+- id: VI-STY-N02
+  name: phan-tram-khong-nhat-quan
+  skill: style-guide-vi
+  category: numbers
+  finding_type: preference
+  scope: document
+  aggregation: consistency
+  severity: low
+  confidence: low
+  summary: Trộn dạng phần trăm có và không có khoảng trắng trong cùng tài liệu.
+  signals:
+    regex:
+    - \b\d+(?:[.,]\d+)?\s*%
+  why_it_matters: Cả hai dạng có thể hợp lệ; vấn đề là tính nhất quán trong cùng phạm vi.
+  rewrite_strategy:
+  - Chọn dạng theo style guide và áp cho văn bản thường, không sửa dữ liệu hoặc code.
+  bad_examples:
+  - text: Tỷ lệ A là 15%, còn tỷ lệ B là 20 %.
+    reason: Hai dạng xuất hiện trong cùng câu.
+  - text: Chiết khấu 5 % ở bảng nhưng 5% trong phần mô tả.
+    reason: Trình bày không thống nhất.
+  good_examples:
+  - mode: clean_rewrite
+    text: Tỷ lệ A là 15%, còn tỷ lệ B là 20%.
+  - mode: clean_rewrite
+    text: Chiết khấu 5% được dùng ở cả bảng và phần mô tả.
+  exceptions:
+  - Trích dẫn, dữ liệu nhập, locale khác nhau hoặc style từng sản phẩm có chủ đích.
+  false_positive_risk: high
+  tags:
+  - phan-tram
+  - nhat-quan
+  min_occurrences: 2
+- id: VI-STY-N03
+  name: ngay-thang-mo-ho
+  skill: style-guide-vi
+  category: numbers
+  finding_type: warning
+  scope: token
+  aggregation: single
+  severity: medium
+  confidence: medium
+  summary: Ngày viết dạng số ngắn có thể bị hiểu theo thứ tự ngày-tháng hoặc tháng-ngày.
+  signals:
+    regex:
+    - \b(?:0?[1-9]|1[0-2])/(?:0?[1-9]|1[0-2])/(?:\d{2}|\d{4})\b
+  why_it_matters: Độc giả quốc tế có thể đảo ngày và tháng, gây sai mốc thời gian.
+  rewrite_strategy:
+  - Dùng tên tháng, ISO 8601 hoặc nêu locale theo style guide.
+  bad_examples:
+  - text: Hạn chót là 07/08/2026.
+    reason: Có thể hiểu là 7 tháng 8 hoặc 8 tháng 7.
+  - text: Cuộc họp dời sang 05/06/26.
+    reason: Cả thứ tự và năm đều có thể mơ hồ.
+  good_examples:
+  - mode: clean_rewrite
+    text: Hạn chót là ngày 7 tháng 8 năm 2026.
+    context: Tài liệu dùng thứ tự ngày/tháng/năm.
+  - mode: needs_author_decision
+    text: Cần xác nhận “26” thuộc thế kỷ nào trước khi đổi định dạng ngày.
+  exceptions:
+  - Tài liệu nội bộ có locale đã công bố, dữ liệu máy hoặc biểu mẫu bắt buộc.
+  false_positive_risk: medium
+  tags:
+  - ngay-thang
+  - locale
+  - mo-ho
+  min_occurrences: 1
+- id: VI-STY-F01
+  name: heading-qua-day
+  skill: style-guide-vi
+  category: formatting
+  finding_type: heuristic
+  scope: document
+  aggregation: density
+  severity: low
+  confidence: medium
+  summary: Dùng nhiều heading cho các phần chỉ có một câu ngắn, làm cấu trúc tài liệu bị vụn.
+  signals:
+    regex:
+    - (?m)^#{2,6}\s+[^\n]+\n\s*\n[^\n]{1,80}\n\s*\n(?=#{2,6}\s)
+  why_it_matters: Heading mất chức năng phân cấp khi mỗi heading chỉ chứa một mẩu thông tin.
+  rewrite_strategy:
+  - Gộp các mục cùng chủ đề thành đoạn hoặc danh sách; giữ heading khi nó giúp điều hướng tài liệu dài.
+  bad_examples:
+  - text: |-
+      ## Tốc độ
+
+      Trang tải nhanh.
+
+      ## Bảo mật
+
+      Dữ liệu được mã hóa.
+    reason: Mỗi heading chỉ che một câu.
+  - text: |-
+      ### Email
+
+      Nhập email.
+
+      ### Mật khẩu
+
+      Nhập mật khẩu.
+    reason: Một danh sách bước sẽ rõ hơn.
+  good_examples:
+  - mode: clean_rewrite
+    text: Trang tải nhanh; dữ liệu được mã hóa.
+  - mode: clean_rewrite
+    text: |-
+      1. Nhập email.
+
+      2. Nhập mật khẩu.
+  exceptions:
+  - Reference tra cứu nhanh, FAQ, UI copy inventory hoặc cấu trúc do hệ thống sinh.
+  false_positive_risk: high
+  tags:
+  - heading
+  - cau-truc
+  min_occurrences: 1
+- id: VI-STY-F02
+  name: in-dam-co-hoc
+  skill: style-guide-vi
+  category: formatting
+  finding_type: heuristic
+  scope: document
+  aggregation: count
+  severity: low
+  confidence: medium
+  summary: Nhiều bullet mở bằng nhãn in đậm và dấu hai chấm dù nội dung có thể viết thành câu hoặc bảng.
+  signals:
+    regex:
+    - (?m)^\s*[-*]\s+\*\*[^*]+\*\*:\s+
+  why_it_matters: Mọi dòng cùng nhấn mạnh làm mất thứ bậc thị giác và tạo danh sách nặng.
+  rewrite_strategy:
+  - Giữ nhãn khi người đọc cần quét; nếu không, viết bullet trực tiếp hoặc dùng bảng.
+  bad_examples:
+  - text: |-
+      - **Tốc độ**: Trang tải nhanh.
+
+      - **Bảo mật**: Dữ liệu được mã hóa.
+    reason: Nhãn không thêm cấu trúc đáng kể.
+  - text: |-
+      - **Bước một**: Mở file.
+
+      - **Bước hai**: Chọn Lưu.
+    reason: Numbered list phù hợp hơn.
+  good_examples:
+  - mode: clean_rewrite
+    text: |-
+      - Trang tải nhanh.
+
+      - Dữ liệu được mã hóa.
+  - mode: clean_rewrite
+    text: |-
+      1. Mở file.
+
+      2. Chọn Lưu.
+  exceptions:
+  - Glossary, danh sách thuộc tính, changelog hoặc nội dung cần quét nhanh theo nhãn.
+  false_positive_risk: high
+  tags:
+  - markdown
+  - in-dam
+  - bullet
+  min_occurrences: 3

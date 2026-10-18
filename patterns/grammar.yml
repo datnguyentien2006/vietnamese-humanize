@@ -1,0 +1,556 @@
+schema_version: '1.0'
+patterns:
+- id: VI-GRA-P01
+  name: khoang-trang-truoc-dau-cau
+  skill: grammar-checker-vi
+  category: punctuation
+  finding_type: error
+  scope: token
+  aggregation: single
+  severity: medium
+  confidence: high
+  summary: Có khoảng trắng thừa trước dấu chấm, phẩy, hỏi, than, hai chấm hoặc chấm phẩy.
+  signals:
+    regex:
+    - '[ \t]+[,.!?;:]'
+  why_it_matters: Khoảng trắng sai làm ngắt nhịp và phá quy ước trình bày phổ biến.
+  rewrite_strategy:
+  - Xóa khoảng trắng trước dấu câu, trừ khi nội dung thuộc code hoặc dữ liệu đặc thù.
+  bad_examples:
+  - text: Báo cáo đã xong , vui lòng kiểm tra.
+    reason: Có khoảng trắng trước dấu phẩy.
+  - text: Bạn đã nhận được email chưa ?
+    reason: Có khoảng trắng trước dấu hỏi.
+  good_examples:
+  - mode: clean_rewrite
+    text: Báo cáo đã xong, vui lòng kiểm tra.
+  - mode: clean_rewrite
+    text: Bạn đã nhận được email chưa?
+  exceptions:
+  - Code, biểu thức, dữ liệu nguyên bản hoặc style typography chuyên biệt.
+  false_positive_risk: low
+  tags:
+  - dau-cau
+  - khoang-trang
+  min_occurrences: 1
+- id: VI-GRA-P02
+  name: thieu-khoang-trang-sau-dau-cau
+  skill: grammar-checker-vi
+  category: punctuation
+  finding_type: error
+  scope: token
+  aggregation: single
+  severity: medium
+  confidence: high
+  summary: Thiếu khoảng trắng sau dấu câu khi một từ mới bắt đầu trên cùng dòng.
+  signals:
+    regex:
+    - '[,.!?;:](?=[A-Za-zÀ-ỹĐđ])'
+  why_it_matters: Hai phần câu dính nhau, gây khó đọc và thường là lỗi gõ.
+  rewrite_strategy:
+  - Thêm một khoảng trắng sau dấu câu nếu đây không phải số, URL, code hay viết tắt.
+  bad_examples:
+  - text: Bản A đã duyệt,bản B còn chờ.
+    reason: Hai vế dính sau dấu phẩy.
+  - text: Lưu ý:không tắt máy.
+    reason: Thiếu khoảng trắng sau dấu hai chấm.
+  good_examples:
+  - mode: clean_rewrite
+    text: Bản A đã duyệt, bản B còn chờ.
+  - mode: clean_rewrite
+    text: 'Lưu ý: không tắt máy.'
+  - mode: no_change
+    text: Gửi hotro@example.com hoặc xem README.md tại TP.HCM.
+    reason: Email, tên tệp và viết tắt giữ dấu chấm sát chữ.
+  exceptions:
+  - Số thập phân, URL, email, phiên bản, code, identifier, tên tệp và viết tắt như TP.HCM.
+  false_positive_risk: medium
+  tags:
+  - dau-cau
+  - khoang-trang
+  min_occurrences: 1
+- id: VI-GRA-P03
+  name: dau-cau-lap
+  skill: grammar-checker-vi
+  category: punctuation
+  finding_type: preference
+  scope: token
+  aggregation: single
+  severity: low
+  confidence: medium
+  summary: Lặp nhiều dấu hỏi hoặc dấu than trong văn bản không cần nhấn mạnh cảm xúc.
+  signals:
+    regex:
+    - '[!?]{2,}'
+  why_it_matters: Dấu câu lặp có thể lệch register công việc, kỹ thuật hoặc hành chính.
+  rewrite_strategy:
+  - Giữ một dấu; nếu cảm xúc có chủ đích trong mạng xã hội thì để nguyên.
+  bad_examples:
+  - text: Vui lòng gửi báo cáo ngay!!
+    reason: Hai dấu than làm email công việc gắt hơn.
+  - text: Vì sao hệ thống dừng???
+    reason: Ba dấu hỏi không thêm nghĩa trong báo cáo sự cố.
+  good_examples:
+  - mode: clean_rewrite
+    text: Vui lòng gửi báo cáo ngay!
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  - mode: clean_rewrite
+    text: Vì sao hệ thống dừng?
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  exceptions:
+  - Hội thoại, mạng xã hội, trích dẫn và văn chương dùng dấu lặp có chủ đích.
+  false_positive_risk: high
+  tags:
+  - dau-cau
+  - register
+  min_occurrences: 1
+- id: VI-GRA-L01
+  name: lap-tu-lien-tiep
+  skill: grammar-checker-vi
+  category: lexical
+  finding_type: error
+  scope: token
+  aggregation: single
+  severity: medium
+  confidence: high
+  summary: Một từ bị lặp ngay cạnh nhau do lỗi gõ hoặc sửa câu chưa hết.
+  signals:
+    regex:
+    - \b([A-Za-zÀ-ỹĐđ]{2,})\s+\1\b
+    exclude_phrases:
+    - song song
+    - dần dần
+    - từ từ
+    - luôn luôn
+    - ngày ngày
+    - đều đều
+    - xa xa
+    - nho nhỏ
+    - chầm chậm
+    - vội vội
+  why_it_matters: Lỗi lặp làm câu vấp và thường không có chức năng tu từ.
+  rewrite_strategy:
+  - Xóa một lần lặp sau khi chắc hai từ không thuộc cấu trúc nhấn mạnh có chủ đích.
+  bad_examples:
+  - text: Nhóm sẽ sẽ gửi kết quả vào chiều nay.
+    reason: '"sẽ" bị lặp do lỗi gõ.'
+  - text: Hệ thống đang đang khởi động lại.
+    reason: Trợ động từ bị lặp.
+  good_examples:
+  - mode: clean_rewrite
+    text: Nhóm sẽ gửi kết quả vào chiều nay.
+  - mode: clean_rewrite
+    text: Hệ thống đang khởi động lại.
+  - mode: no_change
+    text: Người người, nhà nhà đều hướng về quê.
+    reason: Phép lặp có nghĩa, không phải lỗi gõ.
+  - mode: no_change
+    text: Bạn cứ từ từ đọc báo cáo.
+    reason: Từ láy "từ từ" nằm trong exclude_phrases.
+  exceptions:
+  - Phép lặp biểu cảm, từ láy, lời thoại, thơ hoặc ví dụ đang phân tích chính từ đó.
+  false_positive_risk: low
+  tags:
+  - lap-tu
+  - loi-go
+  min_occurrences: 1
+- id: VI-GRA-L02
+  name: chuan-doan-sai-chinh-ta
+  skill: grammar-checker-vi
+  category: spelling
+  finding_type: error
+  scope: token
+  aggregation: single
+  severity: high
+  confidence: high
+  summary: Viết "chuẩn đoán" khi nghĩa cần dùng là hoạt động chẩn đoán bệnh hoặc lỗi.
+  signals:
+    phrases:
+    - chuẩn đoán
+  why_it_matters: Đây là lỗi chính tả phổ biến có thể xuất hiện trong nội dung y tế quan trọng.
+  rewrite_strategy:
+  - Đổi thành "chẩn đoán" khi nói đến việc xác định bệnh, tình trạng hoặc nguyên nhân lỗi.
+  bad_examples:
+  - text: Bác sĩ chuẩn đoán bệnh nhân bị viêm phổi.
+    reason: Dùng sai từ "chẩn đoán".
+  - text: Công cụ hỗ trợ chuẩn đoán lỗi mạng.
+    reason: Ngữ cảnh kỹ thuật vẫn dùng "chẩn đoán".
+  good_examples:
+  - mode: clean_rewrite
+    text: Bác sĩ chẩn đoán bệnh nhân bị viêm phổi.
+  - mode: clean_rewrite
+    text: Công cụ hỗ trợ chẩn đoán lỗi mạng.
+  exceptions:
+  - Trích dẫn nguyên văn, tên riêng hoặc nội dung đang minh họa lỗi chính tả.
+  false_positive_risk: low
+  tags:
+  - chinh-ta
+  - y-khoa
+  min_occurrences: 1
+- id: VI-GRA-L03
+  name: sat-nhap-sai-chinh-ta
+  skill: grammar-checker-vi
+  category: spelling
+  finding_type: error
+  scope: token
+  aggregation: single
+  severity: medium
+  confidence: high
+  summary: Viết "sát nhập" khi nghĩa phổ thông cần dùng là "sáp nhập".
+  signals:
+    phrases:
+    - sát nhập
+  why_it_matters: Dạng sai xuất hiện khá thường xuyên trong văn bản công việc và báo cáo.
+  rewrite_strategy:
+  - Đổi thành "sáp nhập" nếu không phải tên riêng hoặc trích dẫn.
+  bad_examples:
+  - text: Hai phòng ban sẽ sát nhập từ tháng 8.
+    reason: Dùng sai chính tả của "sáp nhập".
+  - text: Kế hoạch sát nhập đã được công bố.
+    reason: Dạng chuẩn phổ thông là "sáp nhập".
+  good_examples:
+  - mode: clean_rewrite
+    text: Hai phòng ban sẽ sáp nhập từ tháng 8.
+  - mode: clean_rewrite
+    text: Kế hoạch sáp nhập đã được công bố.
+  exceptions:
+  - Tên tác phẩm, trích dẫn hoặc dữ liệu cần giữ nguyên chính tả nguồn.
+  false_positive_risk: low
+  tags:
+  - chinh-ta
+  - hanh-chinh
+  min_occurrences: 1
+- id: VI-GRA-C01
+  name: cac-nhung-chong-nhau
+  skill: grammar-checker-vi
+  category: grammar
+  finding_type: error
+  scope: phrase
+  aggregation: single
+  severity: medium
+  confidence: high
+  summary: Dùng đồng thời "các" và "những" trước cùng một danh từ mà không có chức năng riêng.
+  signals:
+    regex:
+    - \bcác\s+những\b|\bnhững\s+các\b
+  why_it_matters: Hai từ chỉ số nhiều chồng lên nhau và thường là lỗi sửa câu.
+  rewrite_strategy:
+  - Giữ "các" cho tập xác định hoặc "những" cho một số phần tử tùy ý nghĩa.
+  bad_examples:
+  - text: Các những tài liệu này cần được lưu lại.
+    reason: Hai từ số nhiều đứng cạnh nhau.
+  - text: Những các nhân viên trên đều đã xử lý yêu cầu.
+    reason: Cấu trúc không tự nhiên.
+  good_examples:
+  - mode: clean_rewrite
+    text: Các tài liệu này cần được lưu lại.
+  - mode: clean_rewrite
+    text: Những nhân viên trên đều đã xử lý yêu cầu.
+  exceptions:
+  - Nội dung trích dẫn nguyên văn hoặc đang phân tích chính lỗi này.
+  false_positive_risk: low
+  tags:
+  - so-nhieu
+  - thua-tu
+  min_occurrences: 1
+- id: VI-GRA-C02
+  name: boi-vi-cho-nen
+  skill: grammar-checker-vi
+  category: grammar
+  finding_type: preference
+  scope: sentence
+  aggregation: count
+  severity: low
+  confidence: medium
+  summary: Kết hợp "bởi vì" và "cho nên" trong câu ngắn khi một vế nối đã đủ rõ.
+  signals:
+    regex:
+    - \bbởi vì\b.{0,140}\bcho nên\b
+  why_it_matters: Cặp quan hệ từ có thể làm câu nặng, nhưng vẫn hợp lệ trong nhiều cách nói.
+  rewrite_strategy:
+  - Giữ một đầu nối khi câu viết cần gọn; giữ cả hai nếu nhịp nói hoặc cấu trúc dài cần đánh dấu.
+  bad_examples:
+  - text: Bởi vì trời mưa cho nên trận đấu bị hoãn.
+    reason: Trong thông báo ngắn, một đầu nối đã đủ.
+  - text: Bởi vì máy hết pin cho nên dữ liệu chưa đồng bộ.
+    reason: Câu có thể trực tiếp hơn.
+  good_examples:
+  - mode: clean_rewrite
+    text: Vì trời mưa, trận đấu bị hoãn.
+  - mode: clean_rewrite
+    text: Máy hết pin nên dữ liệu chưa đồng bộ.
+  exceptions:
+  - Văn nói, lời thoại, câu dài cần đánh dấu rõ hai vế hoặc phong cách tác giả.
+  false_positive_risk: high
+  tags:
+  - quan-he-tu
+  - preference
+  min_occurrences: 2
+- id: VI-GRA-C03
+  name: tham-chieu-dieu-nay-day-dac
+  skill: grammar-checker-vi
+  category: ambiguity
+  finding_type: warning
+  scope: paragraph
+  aggregation: count
+  severity: medium
+  confidence: low
+  summary: Lặp "điều này" nhiều lần khi phần được tham chiếu có thể không rõ.
+  signals:
+    phrases:
+    - điều này
+  why_it_matters: Đại từ chỉ định có thể trỏ đến cả câu, một hành động hoặc một kết quả khác nhau.
+  rewrite_strategy:
+  - Gọi tên sự việc được tham chiếu khi có hơn một tiền tố hợp lý; nếu chưa rõ thì hỏi tác giả.
+  bad_examples:
+  - text: Máy chủ dừng khi sao lưu đang chạy. Điều này làm nhóm lo ngại.
+    reason: Chưa rõ lo ngại việc dừng hay việc sao lưu.
+  - text: Lan báo Mai đã nghỉ. Điều này khiến quản lý bất ngờ.
+    reason: Chưa rõ ai nghỉ và sự việc nào gây bất ngờ.
+  - text: Bản nháp bị ghi đè khi đồng bộ. Điều này cần được làm rõ.
+    reason: Chưa rõ cần làm rõ việc ghi đè hay cơ chế đồng bộ.
+  good_examples:
+  - mode: clean_rewrite
+    text: Việc máy chủ dừng giữa lúc sao lưu làm nhóm lo ngại.
+    context: Nhóm xác nhận việc máy chủ dừng là nguyên nhân gây lo ngại.
+  - mode: clean_rewrite
+    text: Tin Mai nghỉ việc khiến quản lý bất ngờ.
+    context: Lan xác nhận Mai là người đã nghỉ.
+  exceptions:
+  - Khi câu trước chỉ có một mệnh đề và tham chiếu không thể hiểu theo cách khác.
+  false_positive_risk: high
+  tags:
+  - dai-tu
+  - mo-ho
+  min_occurrences: 3
+- id: VI-GRA-C04
+  name: dau-phay-tach-chu-vi
+  skill: grammar-checker-vi
+  category: punctuation
+  finding_type: heuristic
+  scope: sentence
+  aggregation: single
+  severity: medium
+  confidence: low
+  summary: Dấu phẩy có thể đang tách chủ ngữ khỏi vị ngữ mà không có thành phần chen giữa.
+  signals:
+    regex:
+    - \b(?:nhóm|công ty|hệ thống|báo cáo|nghiên cứu)\b.{0,60},\s+(?:đã|sẽ|có|là|giúp)\b
+  why_it_matters: Dấu phẩy sai vị trí làm đứt cấu trúc chủ vị, nhưng rule bề mặt dễ báo nhầm.
+  rewrite_strategy:
+  - Đọc cấu trúc câu; xóa dấu phẩy chỉ khi không có mệnh đề hoặc thành phần chen hợp lệ.
+  bad_examples:
+  - text: Báo cáo mới của nhóm, đã được gửi sáng nay.
+    reason: Dấu phẩy tách chủ ngữ và vị ngữ.
+  - text: Hệ thống theo dõi đơn hàng, sẽ gửi cảnh báo khi có lỗi.
+    reason: Không cần dấu phẩy giữa chủ ngữ và vị ngữ ghép.
+  good_examples:
+  - mode: clean_rewrite
+    text: Báo cáo mới của nhóm đã được gửi sáng nay.
+  - mode: clean_rewrite
+    text: Hệ thống theo dõi đơn hàng và sẽ gửi cảnh báo khi có lỗi.
+  exceptions:
+  - Khi giữa chủ ngữ và vị ngữ có thành phần chen, chú thích hoặc mệnh đề phụ.
+  false_positive_risk: high
+  tags:
+  - dau-phay
+  - chu-vi
+  - heuristic
+  min_occurrences: 1
+- id: VI-GRA-C05
+  name: cap-tu-noi-khong-khop
+  skill: grammar-checker-vi
+  category: grammar
+  finding_type: error
+  scope: sentence
+  aggregation: single
+  severity: medium
+  confidence: high
+  summary: Dùng "không những/không chỉ ... nhưng còn" thay vì cặp tương ứng "... mà còn".
+  signals:
+    regex:
+    - \b(?:không những|không chỉ)\b[^.!?\n]{0,160}\bnhưng còn\b
+  why_it_matters: Hai vế của cặp quan hệ từ không tương ứng làm cấu trúc câu thiếu cân đối.
+  rewrite_strategy:
+  - Đổi "nhưng còn" thành "mà còn", hoặc viết lại hai vế bằng một cấu trúc song song khác.
+  bad_examples:
+  - text: Phương án không những tiết kiệm chi phí nhưng còn rút ngắn thời gian xử lý.
+    reason: '"Không những" cần đi với "mà còn" trong cấu trúc này.'
+  - text: Công cụ không chỉ nhanh nhưng còn dễ sử dụng.
+    reason: Hai đầu nối không tạo thành một cặp tương ứng.
+  good_examples:
+  - mode: clean_rewrite
+    text: Phương án không những tiết kiệm chi phí mà còn rút ngắn thời gian xử lý.
+  - mode: clean_rewrite
+    text: Công cụ nhanh và dễ sử dụng.
+  exceptions:
+  - Trích dẫn nguyên văn hoặc nội dung đang phân tích chính cấu trúc này.
+  false_positive_risk: low
+  tags:
+  - quan-he-tu
+  - song-song
+  min_occurrences: 1
+- id: VI-GRA-C06
+  name: vi-vay-nen
+  skill: grammar-checker-vi
+  category: grammar
+  finding_type: preference
+  scope: phrase
+  aggregation: single
+  severity: low
+  confidence: high
+  summary: Dùng đồng thời "vì vậy" và "nên" khi một từ nối đã đủ thể hiện quan hệ kết quả.
+  signals:
+    regex:
+    - \bvì vậy\s*,?\s+nên\b
+  why_it_matters: Hai từ nối cùng chức năng làm câu nặng mà không bổ sung quan hệ logic.
+  rewrite_strategy:
+  - Giữ "vì vậy" hoặc "nên" khi cả hai cùng chỉ kết quả. Nếu "nên" đang khuyên một hành động, giữ nguyên.
+  bad_examples:
+  - text: Vì vậy nên công ty sẽ áp dụng phương án mới.
+    reason: Một từ nối đã đủ dẫn kết quả.
+  - text: Máy hết pin, vì vậy nên dữ liệu chưa được đồng bộ.
+    reason: Cặp từ nối bị chồng chức năng.
+  good_examples:
+  - mode: clean_rewrite
+    text: Vì vậy, công ty sẽ áp dụng phương án mới.
+  - mode: clean_rewrite
+    text: Máy hết pin nên dữ liệu chưa được đồng bộ.
+  - mode: no_change
+    text: Vì vậy, nên sao lưu dữ liệu trước khi nâng cấp.
+    reason: '"nên" ở đây là lời khuyên, không phải từ nối kết quả thừa.'
+  - mode: no_change
+    text: Vì vậy, nên chọn người có kinh nghiệm.
+    reason: '"nên" khuyên một hành động; "có" trong "có kinh nghiệm" không phải trợ từ kết quả.'
+  - mode: no_change
+    text: Vì vậy, nên nghỉ. Tôi sẽ quay lại.
+    reason: Không đọc trợ từ ở câu sau để kết luận "nên" thừa.
+  - mode: no_change
+    text: Vì vậy, nên chọn người đã làm việc ở đây.
+    reason: '"đã" nằm trong mệnh đề bổ nghĩa, không biến "nên" thành liên từ kết quả thừa.'
+  - mode: no_change
+    text: Vì vậy, nên chọn máy được bảo hành.
+    reason: '"được" trong "được bảo hành" không đủ để kết luận "nên" thừa.'
+  - mode: no_change
+    text: Vì vậy, nên mua máy đang giảm giá.
+    reason: Không đủ chắc "nên" là liên từ kết quả chỉ vì động từ không nằm trong danh sách có sẵn.
+  - mode: no_change
+    text: Vì vậy, nên thuê người đã có kinh nghiệm.
+    reason: '"nên thuê" là lời khuyên; "đã" nằm trong mệnh đề bổ nghĩa.'
+  - mode: no_change
+    text: Vì vậy, nên ưu tiên máy được bảo hành.
+    reason: Giữ nguyên khi không tách được vai trò khuyến nghị và liên từ kết quả.
+  - mode: no_change
+    text: Vì vậy, nên công bố bản đã duyệt.
+    reason: '"công bố" là động từ; không suy chủ ngữ từ âm tiết "công".'
+  - mode: no_change
+    text: Vì vậy, nên công nhận người đã đóng góp.
+    reason: '"công nhận" là động từ khuyến nghị, không phải chủ ngữ "công ty".'
+  - mode: no_change
+    text: Vì vậy, nên dự thi khi đã chuẩn bị kỹ.
+    reason: '"dự thi" là động từ; không suy chủ ngữ từ âm tiết "dự".'
+  exceptions:
+  - Khi "nên" mang nghĩa khuyến nghị; lời thoại cần giữ nguyên khẩu ngữ hoặc trích dẫn nguyên văn.
+    Nếu không tách được hai vai trò, giữ nguyên.
+  false_positive_risk: medium
+  tags:
+  - quan-he-tu
+  - thua-tu
+  min_occurrences: 1
+- id: VI-GRA-P04
+  name: ngoac-khong-can
+  skill: grammar-checker-vi
+  category: punctuation
+  finding_type: preference
+  scope: document
+  aggregation: single
+  severity: low
+  confidence: medium
+  summary: Ngoặc hoặc dấu nháy mở/đóng không cân; cần người viết kiểm tra, không tự đoán chỗ đóng.
+  signals:
+    regex:
+    - '[“”«»()\[\]]'
+  why_it_matters: Dấu không cân làm mơ hồ phạm vi trích dẫn hoặc bổ ngữ.
+  rewrite_strategy:
+  - Đánh dấu để người viết kiểm tra. Không tự thêm dấu đóng hay đổi vị trí ngoặc.
+  bad_examples:
+  - text: Báo cáo “quý 3 vẫn chưa đóng.
+    reason: Có dấu nháy mở mà thiếu dấu đóng.
+  - text: Xem phụ lục (bảng 2 trước khi gửi.
+    reason: Ngoặc đơn mở chưa được đóng.
+  good_examples:
+  - mode: no_change
+    text: Báo cáo “quý 3” vẫn chưa đóng.
+  - mode: no_change
+    text: Xem [hướng dẫn](https://example.com/docs).
+    reason: Link Markdown cân ngoặc; URL không được che mất dấu đóng.
+  - mode: no_change
+    text: 'Truy cập "https://example.com" để đọc thêm.'
+    reason: URL trong ngoặc kép không được nuốt dấu đóng.
+  - mode: no_change
+    text: Truy cập “https://example.com” để đọc thêm.
+    reason: URL trong ngoặc kép cong không được nuốt dấu đóng.
+  - mode: no_change
+    text: Xem https://example.com/a(b) để biết thêm.
+    reason: Ngoặc thuộc đường dẫn URL phải được che cùng nhau.
+  - mode: no_change
+    text: "Kết nối http://[::1]:8000/ để thử."
+    reason: Ngoặc vuông của IPv6 thuộc URL, không phải ngoặc thiếu cặp.
+  - mode: no_change
+    text: "1) Mở ứng dụng.\n2) Chọn báo cáo."
+    reason: Dấu đóng trong ký hiệu đánh số không phải ngoặc đơn cần cặp.
+  - mode: review_comment
+    text: Cần người viết kiểm tra ngoặc đơn, không tự thêm dấu đóng.
+    reason: Không tự đoán vị trí đóng.
+  exceptions:
+  - Code, biểu thức, emoji, và trích đoạn cố ý để mở.
+  false_positive_risk: medium
+  tags:
+  - dau-cau
+  - ngoac
+  min_occurrences: 1
+- id: VI-GRA-S01
+  name: bi-dong-va-chu-ngu-thieu
+  skill: grammar-checker-vi
+  category: grammar
+  finding_type: heuristic
+  scope: sentence
+  aggregation: count
+  severity: medium
+  confidence: medium
+  summary: Câu bị động dày đặc hoặc thiếu chủ ngữ, che giấu người hành động.
+  signals:
+    regex:
+    - '\b(?:được|bị)\s+(?:\w+\s+){1,3}(?:bởi|do)\b'
+    - '\b(?:cần phải|nên được|có thể được)\b'
+  why_it_matters: >-
+    Văn AI thường dùng bị động để tránh nêu chủ thể, tạo giọng khách quan giả tạo.
+    Người viết tự nhiên dùng chủ động khi cần làm rõ người hành động.
+  rewrite_strategy:
+  - Chuyển sang thể chủ động khi có thể xác định được người hành động.
+  - Thêm chủ ngữ nếu câu thiếu và ngữ cảnh cho phép.
+  bad_examples:
+  - text: >-
+      Không cần tệp cấu hình. Kết quả được giữ tự động. Dữ liệu được xử lý bởi hệ thống.
+    reason: Ba câu bị động liên tiếp, thiếu chủ ngữ.
+  - text: >-
+      Báo cáo được hoàn thành bởi nhóm kỹ thuật. Kết quả được xác nhận bởi quản lý.
+    reason: Hai câu bị động, chủ thể hành động bị giấu.
+  good_examples:
+  - mode: clean_rewrite
+    text: >-
+      Bạn không cần tệp cấu hình. Hệ thống tự động giữ kết quả và xử lý dữ liệu.
+    reason: Chuyển sang chủ động, thêm chủ ngữ.
+  - mode: clean_rewrite
+    text: >-
+      Nhóm kỹ thuật hoàn thành báo cáo. Quản lý xác nhận kết quả.
+    reason: Đưa chủ thể lên đầu, câu ngắn hơn.
+  exceptions:
+  - Phương pháp khoa học ưu tiên đối tượng.
+  - Tác nhân không quan trọng hoặc không xác định.
+  false_positive_risk: high
+  tags:
+  - bi-dong
+  - chu-ngu
+  - grammar
+  min_occurrences: 3

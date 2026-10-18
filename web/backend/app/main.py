@@ -1,0 +1,67 @@
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from vietnamese_writing_skills import __version__
+
+from app.capabilities import validate_capability_settings
+from app.config import settings
+from app.db import models  # noqa: F401 - ensure models are registered with Base
+from app.db.database import Base, engine
+from app.limiter import limiter
+from app.proxy import TrustedProxyHeadersMiddleware
+from app.routers import (
+    admin,
+    contributions,
+    health,
+    lint,
+    patterns,
+    report_refiner,
+    rewrite,
+)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    validate_capability_settings()
+    if settings.CONTRIBUTIONS_ENABLED or settings.ADMIN_API_ENABLED:
+        Base.metadata.create_all(bind=engine)
+    yield
+
+
+app = FastAPI(
+    title="Vietnamese Writing Skills API",
+    description="Web API service for Vietnamese writing style analysis and skills",
+    version=__version__,
+    lifespan=lifespan,
+)
+
+# Slowapi setup
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# CORS setup
+origins = [origin.strip() for origin in settings.FRONTEND_ORIGIN.split(",") if origin.strip()]
+if not origins:
+    origins = ["http://localhost:3000"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.add_middleware(TrustedProxyHeadersMiddleware)
+
+# Include Routers
+app.include_router(health.router)
+app.include_router(lint.router)
+app.include_router(patterns.router)
+app.include_router(rewrite.router)
+app.include_router(report_refiner.router)
+app.include_router(contributions.router)
+app.include_router(admin.router)

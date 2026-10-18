@@ -1,0 +1,1340 @@
+schema_version: '1.0'
+patterns:
+- id: VI-HUM-L01
+  name: dong-vai-tro-trong-viec
+  skill: humanizer-vi
+  category: lexical
+  finding_type: heuristic
+  scope: phrase
+  aggregation: density
+  severity: medium
+  confidence: medium
+  summary: Lạm dụng cấu trúc "đóng vai trò ... trong việc" khi một động từ trực tiếp rõ hơn.
+  signals:
+    regex:
+    - \bđóng vai trò.{0,35}trong việc\b
+  why_it_matters: Cụm dài che hành động chính và thường không cho biết tác động cụ thể.
+  rewrite_strategy:
+  - Xác định hành động thật rồi đưa động từ đó lên làm vị ngữ chính.
+  - Giữ mức độ quan trọng nếu văn bản có căn cứ cho đánh giá ấy.
+  bad_examples:
+  - text: Tính năng này đóng vai trò quan trọng trong việc cải thiện hiệu suất.
+    reason: Hành động cải thiện bị đặt sau một cụm trừu tượng.
+  - text: Người quản lý đóng vai trò then chốt trong việc duy trì tiến độ.
+    reason: Câu chưa nói người quản lý làm gì để giữ tiến độ.
+  good_examples:
+  - mode: clean_rewrite
+    text: Tính năng này quan trọng đối với việc cải thiện hiệu suất.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  - mode: clean_rewrite
+    text: Người quản lý có vai trò then chốt đối với việc duy trì tiến độ.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  exceptions:
+  - Khi văn bản thực sự phân tích vai trò của một người, bộ phận hoặc chức năng.
+  false_positive_risk: medium
+  tags:
+  - danh-hoa
+  - dong-tu-yeu
+  - tru-tuong
+  min_occurrences: 2
+- id: VI-HUM-L02
+  name: boi-canh-khong-ngung-phat-trien
+  skill: humanizer-vi
+  category: lexical
+  finding_type: heuristic
+  scope: paragraph
+  aggregation: density
+  severity: low
+  confidence: medium
+  summary: Câu mở bằng "trong bối cảnh không ngừng phát triển" nhưng không nêu thay đổi cụ thể.
+  signals:
+    regex:
+    - \btrong bối cảnh\b[^.!?\n]{0,60}\b(?:không ngừng|ngày càng) phát triển\b
+  why_it_matters: Lời dẫn chiếm chỗ nhưng không giúp người đọc biết điều gì đã thay đổi.
+  rewrite_strategy:
+  - Nêu thay đổi, mốc thời gian hoặc áp lực cụ thể; nếu không có thì bỏ lời dẫn.
+  bad_examples:
+  - text: Trong bối cảnh không ngừng phát triển, doanh nghiệp cần đổi mới.
+    reason: Không có bối cảnh cụ thể.
+  - text: Trong bối cảnh ngày càng phát triển, kỹ năng số rất quan trọng.
+    reason: '"Phát triển" không có chủ thể hay thước đo.'
+  good_examples:
+  - mode: clean_rewrite
+    text: Doanh nghiệp cần đổi mới.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  - mode: clean_rewrite
+    text: Kỹ năng số rất quan trọng.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  exceptions:
+  - Khi câu sau định nghĩa rõ xu hướng và lời dẫn giúp liên kết với đoạn trước.
+  false_positive_risk: medium
+  tags:
+  - loi-dan
+  - chung-chung
+  min_occurrences: 1
+- id: VI-HUM-L03
+  name: loi-khen-chung-chung
+  skill: humanizer-vi
+  category: lexical
+  finding_type: warning
+  scope: paragraph
+  aggregation: density
+  severity: medium
+  confidence: medium
+  summary: Dùng nhiều lời khen như "đột phá" hoặc "vượt trội" mà không có căn cứ trong văn bản.
+  signals:
+    regex:
+    - \b(?:đột phá|vượt trội|đẳng cấp|ấn tượng|tuyệt vời)\b
+  why_it_matters: Giọng quảng cáo không có bằng chứng làm giảm độ tin cậy và có thể lệch register.
+  rewrite_strategy:
+  - Thay lời khen bằng đặc tính, kết quả hoặc bằng chứng đã có trong đầu vào.
+  bad_examples:
+  - text: Trong thử nghiệm nội bộ, công cụ xử lý 2.000 bản ghi mỗi phút với hiệu năng vượt trội.
+    reason: Hai lời khen không có thước đo.
+  - text: Gói này có bảo hành 24 tháng và hỗ trợ trong giờ hành chính với chất lượng đẳng cấp.
+    reason: Câu không cung cấp thông tin kiểm chứng được.
+  good_examples:
+  - mode: review_comment
+    text: Cần có tiêu chí so sánh trước khi gọi hiệu năng “vượt trội”; thông tin hiện có chỉ xác nhận
+      công cụ xử lý 2.000 bản ghi mỗi phút trong thử nghiệm nội bộ.
+    reason: Không xóa đánh giá của tác giả hoặc biến dữ kiện thành câu thay thế khi thiếu căn cứ.
+  - mode: review_comment
+    text: Cần có tiêu chí chất lượng trước khi gọi gói này “đẳng cấp”; thông tin hiện có chỉ xác nhận
+      bảo hành 24 tháng và hỗ trợ trong giờ hành chính.
+    reason: Không tự quyết định bỏ lập trường đánh giá khi chưa có bằng chứng.
+  exceptions:
+  - Khi đây là trích dẫn, slogan đã duyệt hoặc lời đánh giá có nguồn và tiêu chí rõ.
+  false_positive_risk: medium
+  tags:
+  - quang-cao
+  - thieu-bang-chung
+  min_occurrences: 2
+- id: VI-HUM-D01
+  name: mo-bai-thong-bao-noi-dung
+  skill: humanizer-vi
+  category: discourse
+  finding_type: preference
+  scope: document
+  aggregation: single
+  severity: low
+  confidence: high
+  summary: Mở bài thông báo "trong bài viết này" thay vì đi thẳng vào chủ đề.
+  signals:
+    regex:
+    - (?:Trong|Ở) (?:bài viết|phần) này, (?:chúng ta|tôi|bài viết) (?:sẽ|cùng)
+  why_it_matters: Câu meta lặp lại chức năng của tiêu đề và làm chậm thông tin chính.
+  rewrite_strategy:
+  - Mở bằng vấn đề, kết luận chính hoặc bối cảnh cụ thể.
+  bad_examples:
+  - text: Trong bài viết này, chúng ta sẽ cùng tìm hiểu cách cache giữ dữ liệu đã đọc để giảm số lần truy
+      cập nguồn.
+    reason: Chỉ thông báo việc sắp nói.
+  - text: Ở phần này, bài viết sẽ trình bày ba nguyên tắc giúp API thay đổi mà không phá client cũ.
+    reason: Heading đã thể hiện chức năng này.
+  good_examples:
+  - mode: clean_rewrite
+    text: Cache giữ dữ liệu đã đọc để giảm số lần truy cập nguồn.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  - mode: clean_rewrite
+    text: Ba nguyên tắc này giúp API thay đổi mà không phá client cũ.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  exceptions:
+  - Trong syllabus, proposal hoặc tài liệu dài cần nêu rõ phạm vi và cấu trúc.
+  false_positive_risk: low
+  tags:
+  - mo-bai
+  - meta
+  min_occurrences: 1
+- id: VI-HUM-D02
+  name: ket-bai-xa-giao
+  skill: humanizer-vi
+  category: discourse
+  finding_type: preference
+  scope: document
+  aggregation: single
+  severity: low
+  confidence: high
+  summary: Kết thúc bằng lời xã giao chung chung không bổ sung hành động hoặc thông tin.
+  signals:
+    phrases:
+    - hy vọng những thông tin trên sẽ hữu ích
+    - hy vọng bài viết này hữu ích
+  why_it_matters: Câu kết công thức làm yếu điểm dừng và thường không cần trong tài liệu.
+  rewrite_strategy:
+  - Kết ở thông tin cuối cùng hoặc nêu bước tiếp theo có thật.
+  bad_examples:
+  - text: Cấu hình mới có hiệu lực từ lần khởi động tiếp theo. Hy vọng những thông tin trên sẽ hữu ích.
+    reason: Không thêm nội dung hay hành động.
+  - text: Nhóm sẽ chốt phương án tại cuộc họp ngày 25 tháng 7. Hy vọng bài viết này hữu ích.
+    reason: Câu kết sáo và lệch giọng tài liệu.
+  good_examples:
+  - mode: clean_rewrite
+    text: Cấu hình mới có hiệu lực từ lần khởi động tiếp theo.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  - mode: clean_rewrite
+    text: Nhóm sẽ chốt phương án tại cuộc họp ngày 25 tháng 7.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  exceptions:
+  - Trong thư cá nhân hoặc trao đổi chăm sóc khách hàng khi lời chúc phù hợp quan hệ.
+  false_positive_risk: low
+  tags:
+  - ket-bai
+  - xa-giao
+  min_occurrences: 1
+- id: VI-HUM-D03
+  name: dan-nguon-mo-ho
+  skill: humanizer-vi
+  category: discourse
+  finding_type: warning
+  scope: sentence
+  aggregation: single
+  severity: high
+  confidence: medium
+  summary: Gán nhận định cho "các chuyên gia" hoặc "nhiều nghiên cứu" mà không xác định nguồn.
+  signals:
+    regex:
+    - \b(?:các chuyên gia|nhiều nghiên cứu|giới quan sát|nhiều nguồn) (?:cho rằng|chỉ ra|nhận định)\b
+  why_it_matters: Người đọc không thể kiểm tra nguồn, còn người biên tập dễ vô tình củng cố một tuyên
+    bố chưa có căn cứ.
+  rewrite_strategy:
+  - Nêu nguồn có sẵn; nếu không có, thu hẹp tuyên bố hoặc đánh dấu cần nguồn.
+  bad_examples:
+  - text: Các chuyên gia cho rằng phương pháp này hoàn toàn an toàn.
+    reason: Không rõ chuyên gia nào và tiêu chí an toàn nào.
+  - text: Nhiều nghiên cứu chỉ ra mô hình giúp tăng năng suất.
+    reason: Không có nghiên cứu, đối tượng hay mức tăng.
+  good_examples:
+  - mode: review_comment
+    text: Cần bổ sung nguồn cụ thể cho nhận định rằng phương pháp hoàn toàn an toàn.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  - mode: review_comment
+    text: Cần xác định các nghiên cứu về tác động của mô hình lên năng suất.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  exceptions:
+  - Khi nguồn đã được nêu rõ ở câu ngay trước và cụm này chỉ tham chiếu lại.
+  false_positive_risk: medium
+  tags:
+  - nguon
+  - mo-ho
+  - bao-toan
+  min_occurrences: 1
+- id: VI-HUM-S01
+  name: lap-cau-mo-dau-bang-viec
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: paragraph
+  aggregation: sequence
+  severity: medium
+  confidence: medium
+  summary: Nhiều câu liên tiếp trong cùng đoạn mở bằng cùng một từ, tạo nhịp đều.
+  signals:
+    regex:
+    - (?m)^\s*\S+
+  why_it_matters: Danh hóa liên tiếp làm đoạn nặng và khiến hành động khó nhìn thấy.
+  rewrite_strategy:
+  - Đưa chủ thể hoặc động từ lên đầu; gộp câu khi chúng cùng một chủ thể.
+  bad_examples:
+  - text: Việc cập nhật giúp giảm lỗi. Việc kiểm thử giúp tăng độ ổn định.
+    reason: Hai câu cùng khuôn, chủ thể thực hiện biến mất.
+  - text: Việc họp sớm là cần thiết. Việc gửi tài liệu trước cũng quan trọng.
+    reason: Nhịp danh hóa lặp mà không cần thiết.
+  good_examples:
+  - mode: clean_rewrite
+    text: Cập nhật giúp giảm lỗi; kiểm thử giúp tăng độ ổn định.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  - mode: clean_rewrite
+    text: Họp sớm là việc cần thiết; gửi tài liệu trước cũng quan trọng.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  exceptions:
+  - Khi "việc" gọi tên một hành vi đã được định nghĩa trong văn bản pháp lý hoặc phân tích.
+  - Danh sách có chủ đích (gạch đầu dòng, đánh số) dùng cùng chủ thể.
+  - Tín hiệu nằm ở các đoạn khác nhau.
+  false_positive_risk: medium
+  tags:
+  - danh-hoa
+  - lap-cau
+  min_occurrences: 3
+- id: VI-HUM-S02
+  name: khong-chi-ma-con-lap
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: paragraph
+  aggregation: count
+  severity: low
+  confidence: medium
+  summary: Lặp cấu trúc "không chỉ ... mà còn" để tạo nhấn mạnh cho các ý bình thường.
+  signals:
+    regex:
+    - \bkhông chỉ\b.{0,100}\bmà còn\b
+  why_it_matters: Nhấn mạnh cơ học khiến đoạn khoa trương và các câu có cùng nhịp.
+  rewrite_strategy:
+  - Nêu trực tiếp hai tác động hoặc chọn tác động quan trọng hơn.
+  bad_examples:
+  - text: Công cụ không chỉ mở tệp 2 GB trong 4 giây mà còn có phím tắt cho các thao tác chính.
+    reason: Hai lời khen chung chung được nâng giọng.
+  - text: Khóa học không chỉ có sáu bài thực hành mà còn có một buổi phản biện.
+    reason: Cấu trúc thay cho bằng chứng cụ thể.
+  good_examples:
+  - mode: clean_rewrite
+    text: Công cụ mở tệp 2 GB trong 4 giây và có phím tắt cho các thao tác chính.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  - mode: clean_rewrite
+    text: Khóa học có sáu bài thực hành và một buổi phản biện.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  exceptions:
+  - Khi phép đối sánh là trọng tâm lập luận và không bị lặp trong đoạn.
+  false_positive_risk: high
+  tags:
+  - nhan-manh
+  - doi-xung
+  min_occurrences: 2
+- id: VI-HUM-S03
+  name: tu-noi-day-dac
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: paragraph
+  aggregation: density
+  severity: medium
+  confidence: medium
+  summary: Dùng dày các từ nối "đồng thời", "qua đó" và "từ đó" dù quan hệ logic đã rõ.
+  signals:
+    regex:
+    - \b(?:đồng thời|qua đó|từ đó)\b
+  why_it_matters: Từ nối cơ học làm đoạn đều giọng và có thể gán quan hệ nhân quả không tồn tại.
+  rewrite_strategy:
+  - Giữ từ nối chỉ khi nó diễn đạt quan hệ logic cần thiết; tách câu nếu có quá nhiều mệnh đề.
+  bad_examples:
+  - text: Hệ thống lưu log, đồng thời gửi cảnh báo, qua đó giúp nhóm phản hồi, từ đó nâng cao chất lượng.
+    reason: Ba từ nối kéo theo một chuỗi nhân quả chưa được chứng minh.
+  - text: Nhóm sửa lỗi, đồng thời cập nhật tài liệu, qua đó tạo ra giá trị.
+    reason: Phần cuối trừu tượng và không cần thiết.
+  good_examples:
+  - mode: clean_rewrite
+    text: Hệ thống lưu log và gửi cảnh báo để giúp nhóm phản hồi, từ đó nâng cao chất lượng.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  - mode: clean_rewrite
+    text: Nhóm sửa lỗi, cập nhật tài liệu và qua đó tạo ra giá trị.
+    reason: Giữ các dữ kiện đã có và chỉ sửa cấu trúc mục tiêu.
+  - mode: no_change
+    text: "Nhóm lưu log, đồng thời gửi cảnh báo.\n\nQua đó quy trình rõ hơn.\n\nTừ đó chất lượng tăng."
+    reason: Mỗi đoạn chỉ có một từ nối; không gộp tín hiệu xuyên đoạn.
+  - mode: no_change
+    text: "- Nhóm lưu log, đồng thời gửi cảnh báo.\n- Qua đó, quy trình rõ hơn.\n- Từ đó, chất lượng tăng."
+    reason: Danh sách có chủ đích; không gộp tín hiệu giữa các mục.
+  exceptions:
+  - Khi phép đối sánh là trọng tâm lập luận và không bị lặp trong đoạn.
+  - Tín hiệu nằm ở các đoạn khác nhau.
+  - Danh sách có chủ đích (gạch đầu dòng, đánh số).
+  false_positive_risk: medium
+  tags:
+  - tu-noi
+  - logic
+  min_occurrences: 3
+- id: VI-HUM-S04
+  name: do-dai-cau-dong-deu
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: document
+  aggregation: variance
+  severity: low
+  confidence: low
+  summary: Năm câu trở lên có độ dài gần như nhau, tạo nhịp đều cần người viết đọc lại.
+  signals:
+    regex:
+    - (?s)(?:[^.!?]{45,85}[.!?]\s*){5,}
+  why_it_matters: Nhịp đều có thể làm ý chính và ý phụ có cùng trọng lượng, nhưng đây chỉ là heuristic.
+  rewrite_strategy:
+  - Đọc thành tiếng và chỉ tách hoặc gộp nơi cấu trúc ý cần thay đổi.
+  bad_examples:
+  - text: Nhóm nhận yêu cầu vào sáng nay. Nhóm kiểm tra dữ liệu vào buổi trưa. Nhóm gửi kết quả vào cuối
+      ngày. Nhóm lưu biên bản sau cuộc họp. Nhóm đóng yêu cầu khi hoàn tất.
+    reason: Các câu cùng khuôn và trọng lượng.
+  - text: Máy chủ ghi log mỗi phút. Hệ thống gửi báo cáo mỗi giờ. Nhân viên xem dashboard mỗi ngày. Bộ
+      phận sao lưu dữ liệu mỗi tuần. Quản lý rà báo cáo mỗi tháng.
+    reason: Nhịp lặp che quan hệ giữa các hành động.
+  good_examples:
+  - mode: clean_rewrite
+    text: Nhóm nhận yêu cầu sáng nay, kiểm tra dữ liệu vào buổi trưa và sẽ gửi kết quả cuối ngày. Sau
+      cuộc họp, nhóm lưu biên bản và đóng yêu cầu khi hoàn tất.
+  - mode: clean_rewrite
+    text: Máy chủ ghi log mỗi phút và hệ thống gửi báo cáo mỗi giờ. Nhân viên xem dashboard hằng ngày;
+      bộ phận sao lưu dữ liệu mỗi tuần, còn quản lý rà báo cáo mỗi tháng.
+  exceptions:
+  - Checklist, thông số kỹ thuật, văn bản cho người mới đọc hoặc nhịp lặp có chủ đích.
+  false_positive_risk: high
+  tags:
+  - nhip-cau
+  - heuristic
+  min_occurrences: 1
+- id: VI-HUM-L04
+  name: mat-do-han-viet-sao-rong
+  skill: humanizer-vi
+  category: lexical
+  finding_type: heuristic
+  scope: paragraph
+  aggregation: density
+  severity: medium
+  confidence: medium
+  summary: Mật độ từ Hán-Việt sáo rỗng cao trong một đoạn văn, tạo giọng "văn AI" cứng nhắc.
+  signals:
+    regex:
+    - '\b(?:đi sâu vào|tận dụng|bức tranh toàn cảnh|đóng vai trò quan trọng|mang tính cách mạng|thay đổi cuộc chơi|tối ưu hóa|nâng cao nhận thức|khai thác tiềm năng|điểm mấu chốt|yếu tố then chốt|giải pháp toàn diện|hệ sinh thái|trải nghiệm người dùng|nâng tầm|kiến tạo|tối đa hóa|tận dụng triệt để|đẩy mạnh|thúc đẩy mạnh mẽ|chuyển đổi số toàn diện|đột phá mạnh mẽ)\b'
+  why_it_matters: >-
+    Mô hình ngôn ngữ chọn từ Hán-Việt trang trọng vì chúng xuất hiện nhiều trong
+    dữ liệu huấn luyện. Khi dùng dày đặc, văn bản trở nên cứng nhắc, thiếu tự nhiên
+    và trùng lặp với văn bản AI khác. Người Việt viết tự nhiên thường dùng từ thuần
+    Việt hoặc Hán-Việt phổ thông.
+  rewrite_strategy:
+  - Thay thế bằng từ thuần Việt hoặc Hán-Việt phổ thông khi có lựa chọn tự nhiên hơn.
+  - Giữ nguyên nếu từ đó là thuật ngữ chuyên ngành đã được định nghĩa.
+  bad_examples:
+  - text: >-
+      Chúng tôi đi sâu vào phân tích bức tranh toàn cảnh của thị trường, tận dụng
+      các nguồn lực sẵn có để tối ưu hóa quy trình và nâng cao nhận thức của đội ngũ.
+    reason: Năm cụm Hán-Việt sáo rỗng trong một câu.
+  - text: >-
+      Chúng tôi tận dụng triệt để nguồn lực để tối đa hóa giá trị và nâng tầm hệ sinh thái.
+    reason: Ba cụm sáo rỗng trong một câu ngắn.
+  good_examples:
+  - mode: clean_rewrite
+    text: >-
+      Chúng tôi phân tích thị trường, dùng nguồn lực sẵn có để cải thiện quy trình
+      và giúp đội ngũ hiểu rõ hơn.
+    reason: Giữ nguyên ý, thay từ sáo rỗng bằng từ tự nhiên.
+  - mode: clean_rewrite
+    text: >-
+      Chúng tôi dùng tối đa nguồn lực hiện có để tăng giá trị và cải thiện hệ thống.
+    reason: Thay cụm sáo rỗng bằng từ tự nhiên.
+  exceptions:
+  - Văn bản pháp lý, hành chính cần giữ thuật ngữ Hán-Việt chính xác.
+  - Trích dẫn nguyên văn.
+  false_positive_risk: medium
+  tags:
+  - han-viet
+  - mat-do
+  - lexical
+  min_occurrences: 3
+- id: VI-HUM-S05
+  name: do-dai-cau-qua-deu
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: document
+  aggregation: variance
+  severity: medium
+  confidence: medium
+  summary: Độ biến thiên độ dài câu thấp (burstiness thấp) – dấu hiệu thống kê mạnh của văn AI.
+  signals:
+    regex:
+    - '(?!)'
+  why_it_matters: >-
+    Văn bản con người có độ biến thiên độ dài câu cao: xen kẽ câu ngắn và câu dài.
+    Văn AI có xu hướng tạo ra các câu dài gần bằng nhau, độ lệch chuẩn thấp.
+    Đây là một trong những đặc trưng thống kê mạnh nhất mà detector AI sử dụng.
+  rewrite_strategy:
+  - >-
+    Đa dạng hóa độ dài câu: tách câu dài thành câu ngắn, gộp câu ngắn thành câu dài.
+  - Đọc thành tiếng và điều chỉnh nhịp điệu.
+  bad_examples:
+  - text: >-
+      Hệ thống mới giúp giảm thời gian xử lý. Nó cũng giúp tăng độ chính xác.
+      Người dùng có thể thao tác nhanh hơn. Quản trị viên có thể giám sát dễ hơn.
+      Tất cả các tính năng đều hoạt động ổn định.
+    reason: Năm câu có độ dài gần như nhau (7-8 từ).
+  - text: >-
+      Quy trình được cập nhật thường xuyên. Tài liệu được bổ sung đầy đủ.
+      Nhân viên được đào tạo định kỳ. Kết quả được đánh giá hàng quý.
+      Chất lượng được cải thiện liên tục.
+    reason: Năm câu cùng độ dài và cùng cấu trúc bị động.
+  good_examples:
+  - mode: clean_rewrite
+    text: >-
+      Hệ thống mới giúp giảm thời gian xử lý và tăng độ chính xác. Người dùng thao tác
+      nhanh hơn; quản trị viên giám sát dễ hơn. Tất cả tính năng đều ổn định.
+    reason: Xen kẽ câu ngắn và dài, tạo nhịp tự nhiên hơn.
+  - mode: clean_rewrite
+    text: >-
+      Quy trình cập nhật thường xuyên, tài liệu đầy đủ. Nhân viên đào tạo định kỳ,
+      kết quả đánh giá hàng quý. Chất lượng cải thiện liên tục.
+    reason: Xen kẽ câu ngắn và dài, tránh nhịp đều đều.
+  exceptions:
+  - Checklist, danh sách có cấu trúc cố định.
+  - Văn bản kỹ thuật cần độ chính xác cao.
+  false_positive_risk: high
+  tags:
+  - burstiness
+  - nhip-cau
+  - thong-ke
+  min_occurrences: 1
+- id: VI-HUM-D04
+  name: meta-discourse-thua
+  skill: humanizer-vi
+  category: discourse
+  finding_type: heuristic
+  scope: paragraph
+  aggregation: count
+  severity: low
+  confidence: medium
+  summary: Câu chỉ dẫn người đọc ("cần lưu ý rằng", "đáng chú ý là", "như đã đề cập") xuất hiện dày trong một đoạn mà không mang thông tin mới.
+  signals:
+    phrases:
+    - cần lưu ý rằng
+    - cần nhấn mạnh rằng
+    - điều quan trọng cần lưu ý là
+    - đáng chú ý là
+    - đáng lưu ý là
+    - điều đáng chú ý là
+    - như đã đề cập ở trên
+    - như đã nói ở trên
+    - như chúng ta đã biết
+    - trước khi đi vào chi tiết
+    - trước khi bàn tiếp
+    - chúng ta sẽ cùng
+    - chúng ta hãy cùng
+  why_it_matters: Câu meta chỉ dẫn người đọc mà không mang thông tin mới làm văn bản nặng nề và tạo giọng "giảng giải" không cần thiết.
+  rewrite_strategy:
+  - Bỏ câu meta khi phần theo sau đã đủ rõ.
+  - Chỉ giữ khi thực sự cần phân nhánh tài liệu dài.
+  bad_examples:
+  - text: Đáng chú ý là hệ thống có 3 tầng. Cần lưu ý rằng tầng 2 xử lý dữ liệu.
+    reason: Hai câu meta liên tiếp trong cùng đoạn.
+  - text: Như đã đề cập ở trên, chính sách mới có hiệu lực. Đáng lưu ý là chính sách áp dụng toàn quốc.
+    reason: Hai câu chỉ dẫn người đọc nhưng không thêm dữ kiện.
+  good_examples:
+  - mode: clean_rewrite
+    text: Hệ thống có 3 tầng. Tầng 2 xử lý dữ liệu.
+    reason: Bỏ câu meta, giữ nguyên dữ kiện.
+  - mode: no_change
+    text: Như đã đề cập ở phần Kiến trúc, hệ thống dùng cache. Phần này mô tả cách cache hoạt động.
+    reason: Câu meta dùng để liên kết phần cụ thể trong tài liệu dài.
+  exceptions:
+  - Tài liệu dài, sách giáo trình, hoặc văn bản có phân nhánh cấu trúc cần câu dẫn.
+  - Trích dẫn nguyên văn.
+  false_positive_risk: medium
+  tags:
+  - meta
+  - discourse
+  - cau-dan
+  min_occurrences: 2
+- id: VI-HUM-D05
+  name: so-lieu-khong-nguon
+  skill: humanizer-vi
+  category: discourse
+  finding_type: warning
+  scope: sentence
+  aggregation: count
+  severity: medium
+  confidence: medium
+  summary: Số liệu hoặc tỉ lệ phần trăm xuất hiện nhiều lần trong văn bản mà câu chứa chúng không nêu nguồn hoặc dấu hiệu ước lượng.
+  signals:
+    regex:
+    - \b\d+(?:[.,]\d+)?\s*%
+    - \b\d+(?:[.,]\d+)?\s*(?:triệu|nghìn|ngàn|tỷ)\b
+  why_it_matters: Số liệu không nguồn khó kiểm chứng, dễ bị hiểu là dữ kiện đã xác nhận. Đây là dấu hiệu mạnh của văn AI hoặc văn marketing không cẩn trọng.
+  rewrite_strategy:
+  - Nêu nguồn cụ thể nếu có.
+  - Đánh dấu là ước lượng nếu không có nguồn.
+  - Thu hẹp tuyên bố nếu con số không kiểm chứng được.
+  bad_examples:
+  - text: 70% người dùng hài lòng với sản phẩm. 85% khách hàng quay lại sau 3 tháng.
+    reason: Hai số liệu không có nguồn.
+  - text: Doanh thu tăng 25% và lợi nhuận tăng 30% trong năm qua.
+    reason: Hai số liệu không nguồn và không mốc cụ thể.
+  good_examples:
+  - mode: no_change
+    text: Theo khảo sát nội bộ tháng 6, 70% người dùng hài lòng với sản phẩm.
+    reason: Số liệu có nguồn rõ.
+  - mode: no_change
+    text: Tôi ước chừng khoảng 70% người dùng hài lòng.
+    reason: Có dấu hiệu ước lượng.
+  exceptions:
+  - Câu có nguồn cụ thể, hoặc dấu hiệu ước lượng rõ.
+  - Số liệu trong biểu đồ/bảng có chú thích nguồn.
+  false_positive_risk: medium
+  tags:
+  - so-lieu
+  - nguon
+  - kiem-chung
+  min_occurrences: 2
+- id: VI-HUM-L05
+  name: lam-phat-khai-niem
+  skill: humanizer-vi
+  category: lexical
+  finding_type: heuristic
+  scope: phrase
+  aggregation: count
+  severity: medium
+  confidence: medium
+  summary: Danh từ cụ thể được bọc trong wrapper trừu tượng ("hành trình học tập", "trải nghiệm người dùng") khi từ gốc đã đủ nghĩa.
+  signals:
+    phrases:
+    - hành trình học tập
+    - hành trình sự nghiệp
+    - hành trình khởi nghiệp
+    - hành trình chuyển đổi
+    - trải nghiệm người dùng
+    - trải nghiệm khách hàng
+    - trải nghiệm mua sắm
+    - trải nghiệm sử dụng
+    - quá trình chuyển đổi
+    - quá trình phát triển
+    - quá trình hình thành
+    - công cuộc đổi mới
+    - công cuộc chuyển đổi
+    - chặng đường phát triển
+  why_it_matters: Wrapper trừu tượng làm danh từ cụ thể mất độ nét và tạo giọng marketing chung chung. Người viết tự nhiên thường dùng thẳng danh từ cụ thể.
+  rewrite_strategy:
+  - Bỏ wrapper nếu danh từ gốc đã đủ nghĩa.
+  - Giữ nếu wrapper thực sự là một khái niệm được định nghĩa trong tài liệu.
+  bad_examples:
+  - text: Trải nghiệm người dùng của sản phẩm này rất tốt. Hành trình học tập của sinh viên cần được tôn trọng.
+    reason: Hai wrapper trừu tượng cho hai khái niệm cụ thể.
+  - text: Công cuộc chuyển đổi số đang diễn ra, mở ra hành trình sự nghiệp mới.
+    reason: Hai cụm wrapper trong một câu.
+  good_examples:
+  - mode: clean_rewrite
+    text: Sản phẩm này dễ dùng. Việc học của sinh viên cần được tôn trọng.
+    reason: Dùng thẳng danh từ cụ thể.
+  - mode: no_change
+    text: Trải nghiệm người dùng là thuật ngữ UX đo mức độ dễ dùng của sản phẩm.
+    reason: Wrapper là thuật ngữ đã được định nghĩa.
+  exceptions:
+  - Wrapper là thuật ngữ chuyên ngành đã định nghĩa (ví dụ trong glossary UX).
+  - Trích dẫn nguyên văn hoặc slogan đã duyệt.
+  false_positive_risk: medium
+  tags:
+  - danh-tu-truu-tuong
+  - wrapper
+  - lexical
+  min_occurrences: 2
+- id: VI-HUM-L06
+  name: do-sau-gia
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: sentence
+  aggregation: count
+  severity: low
+  confidence: low
+  summary: Câu có cấu trúc "không phải X mà là Y" lặp lại như khuôn, tạo cảm giác sâu sắc mà không thêm dữ kiện.
+  signals:
+    regex:
+    - \bkhông phải\b[^.!?\n]{1,60}\bmà (?:là|chính là)\b
+  why_it_matters: Cấu trúc đối lập có thể hợp lý trong văn nghị luận, nhưng khi lặp lại thành khuôn thì trở thành lời kết luận rỗng nghe có vẻ sâu.
+  rewrite_strategy:
+  - Nêu trực tiếp điểm chính.
+  - Giữ cấu trúc đối lập khi thực sự có hai lựa chọn đối lập cần phân biệt.
+  bad_examples:
+  - text: Thành công không phải là đích đến mà là hành trình. Mục tiêu không phải là tiền mà là ý nghĩa.
+    reason: Hai câu cùng khuôn, đều trừu tượng.
+  - text: Điều quan trọng không phải là câu trả lời mà là câu hỏi. Vấn đề không phải là tốc độ mà là hướng đi.
+    reason: Cấu trúc lặp tạo cảm giác sâu sắc giả.
+  good_examples:
+  - mode: review_comment
+    text: Cần cụ thể hóa "hành trình" và "đích đến" là gì trước khi giữ cấu trúc đối lập; hiện tại cả hai đều trừu tượng.
+    reason: Không tự thay câu của tác giả khi chưa rõ dữ kiện.
+  - mode: no_change
+    text: Dự án không phải là bản demo mà là sản phẩm hoàn chỉnh.
+    reason: Hai lựa chọn cụ thể, đối lập rõ, không phải câu rỗng.
+  exceptions:
+  - Hai nhánh X và Y đều có chi tiết cụ thể hoặc là thuật ngữ đã định nghĩa.
+  - Trích dẫn nguyên văn, slogan.
+  false_positive_risk: high
+  tags:
+  - cau-truc
+  - doi-lap
+  - false-depth
+  min_occurrences: 2
+- id: VI-HUM-S12
+  name: tu-noi-chuyen-y-day-dac
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: paragraph
+  aggregation: density
+  severity: low
+  confidence: medium
+  summary: Từ nối chuyển ý ("tuy nhiên", "bên cạnh đó", "hơn nữa") xuất hiện dày trong một đoạn dù ý đã liên kết tự nhiên.
+  signals:
+    phrases:
+    - tuy nhiên
+    - bên cạnh đó
+    - hơn nữa
+    - ngoài ra
+    - thêm vào đó
+    - đặc biệt là
+    - cụ thể là
+    - mặt khác
+    - ngược lại
+    - trái lại
+  why_it_matters: Từ nối chuyển ý cơ học làm đoạn văn đều giọng và có thể gán quan hệ tương phản hoặc bổ sung không tồn tại. Khác với từ nối kết quả (đồng thời, qua đó, từ đó) đã có pattern riêng.
+  rewrite_strategy:
+  - Giữ từ nối chỉ khi quan hệ logic cần thiết.
+  - Bỏ từ nối khi ý đã liên kết tự nhiên.
+  bad_examples:
+  - text: Tuy nhiên, hệ thống còn lỗi. Hơn nữa, hiệu năng chưa tốt. Ngoài ra, tài liệu còn thiếu.
+    reason: Ba từ nối chuyển ý trong ba câu liên tiếp.
+  - text: Bên cạnh đó, cần cải thiện UI. Thêm vào đó, cần thêm test. Đặc biệt là test tích hợp.
+    reason: Ba từ nối chuyển ý trong ba câu.
+  good_examples:
+  - mode: clean_rewrite
+    text: Hệ thống còn lỗi, hiệu năng chưa tốt và tài liệu còn thiếu.
+    reason: Bỏ từ nối, gộp ý liên kết tự nhiên.
+  - mode: no_change
+    text: Tuy nhiên, dự án vẫn còn rủi ro.
+    reason: Một từ nối chuyển ý cho quan hệ tương phản rõ ràng.
+  exceptions:
+  - Đoạn có ≥5 câu và mỗi từ nối đánh dấu quan hệ khác nhau.
+  - Danh sách có chủ đích (gạch đầu dòng, đánh số).
+  false_positive_risk: medium
+  tags:
+  - tu-noi
+  - chuyen-y
+  min_occurrences: 3
+- id: VI-HUM-S07
+  name: doan-deu-cau
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: document
+  aggregation: variance
+  severity: low
+  confidence: low
+  summary: Năm đoạn trở lên có số câu gần bằng nhau, tạo cấu trúc đoạn đều đặn cần người viết đọc lại.
+  signals:
+    regex:
+    - '(?!)'
+  why_it_matters: >-
+    Văn AI thường tạo mỗi đoạn 4-5 câu để cấu trúc trông "đầy đủ". Người viết
+    tự nhiên xen kẽ đoạn ngắn 1-2 câu với đoạn dài 7-8 câu. Đây là dấu hiệu
+    cấu trúc, không phải lỗi ngữ pháp.
+  rewrite_strategy:
+  - Đọc lại từng đoạn và chỉ tách hoặc gộp khi cấu trúc ý cần thay đổi.
+  - Cho phép một vài đoạn rất ngắn nếu ý không cần triển khai.
+  bad_examples:
+  - text: |
+      Đoạn một có bốn câu. Câu hai ngắn. Câu ba ngắn. Câu bốn ngắn.
+
+      Đoạn hai có bốn câu. Câu hai ngắn. Câu ba ngắn. Câu bốn ngắn.
+
+      Đoạn ba có bốn câu. Câu hai ngắn. Câu ba ngắn. Câu bốn ngắn.
+
+      Đoạn bốn có bốn câu. Câu hai ngắn. Câu ba ngắn. Câu bốn ngắn.
+
+      Đoạn năm có bốn câu. Câu hai ngắn. Câu ba ngắn. Câu bốn ngắn.
+    reason: Năm đoạn đều 4 câu, cấu trúc đều đặn.
+  - text: |
+      Đoạn sáu có bốn câu. Câu hai ngắn. Câu ba ngắn. Câu bốn ngắn.
+
+      Đoạn bảy có bốn câu. Câu hai ngắn. Câu ba ngắn. Câu bốn ngắn.
+
+      Đoạn tám có bốn câu. Câu hai ngắn. Câu ba ngắn. Câu bốn ngắn.
+
+      Đoạn chín có bốn câu. Câu hai ngắn. Câu ba ngắn. Câu bốn ngắn.
+
+      Đoạn mười có bốn câu. Câu hai ngắn. Câu ba ngắn. Câu bốn ngắn.
+    reason: Năm đoạn đều 4 câu, cấu trúc đều đặn.
+  good_examples:
+  - mode: clean_rewrite
+    text: |-
+      Đoạn ngắn.
+
+      Đoạn dài có nhiều câu liên tiếp. Câu hai dài hơn. Câu ba cũng vậy. Câu bốn nữa. Câu năm tiếp theo. Câu sáu vẫn dài. Câu bảy kết thúc đoạn.
+
+      Đoạn ba câu. Câu hai. Câu ba.
+
+      Đoạn bốn có năm câu. Câu hai. Câu ba. Câu bốn. Câu năm.
+
+      Đoạn năm có bảy câu. Câu hai. Câu ba. Câu bốn. Câu năm. Câu sáu. Câu bảy.
+    reason: Đoạn dài ngắn xen kẽ, cấu trúc biến thiên.
+  - mode: no_change
+    text: |-
+      Checklist:
+      - Mục một.
+      - Mục hai.
+      - Mục ba.
+    reason: Cấu trúc danh sách có chủ đích, không phải văn xuôi.
+  exceptions:
+  - Checklist, thông số kỹ thuật, văn bản có cấu trúc do hệ thống sinh.
+  - Văn bản có quy định mỗi mục một đoạn ngắn (thông báo hành chính).
+  false_positive_risk: high
+  tags:
+  - cau-truc-doan
+  - nhip-dieu
+  - heuristic
+  min_occurrences: 1
+- id: VI-HUM-S08
+  name: hedge-rai-deu
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: document
+  aggregation: variance
+  severity: low
+  confidence: low
+  summary: Hedge ("có lẽ", "dường như", "có khả năng") rải đều khắp mọi đoạn thay vì tập trung ở chỗ thật sự cần.
+  signals:
+    regex:
+    - '(?!)'
+  why_it_matters: >-
+    Văn AI rải hedge đều để trông "khiêm tốn khoa học". Người viết tự nhiên
+    hedge ở chỗ không chắc và khẳng định ở chỗ chắc. Hedge đều khắp văn bản làm
+    giảm độ tin cậy và làm người đọc khó biết tác giả thực sự nghĩ gì.
+  rewrite_strategy:
+  - Tập trung hedge ở chỗ thực sự cần bảo vệ nhận định.
+  - Khẳng định trực tiếp ở chỗ có đủ căn cứ.
+  bad_examples:
+  - text: |
+      Kết quả có lẽ đúng.
+
+      Phân tích dường như ổn.
+
+      Mô hình có khả năng tốt.
+
+      Dữ liệu có vẻ sạch.
+
+      Kết luận có lẽ hợp lý.
+    reason: Năm đoạn, mỗi đoạn có một hedge, rải đều không tập trung.
+  - text: |
+      Nhận định có lẽ chính xác.
+
+      Số liệu dường như ổn.
+
+      Phân tích có khả năng đúng.
+
+      Kết quả có vẻ tốt.
+
+      Kết luận có lẽ hợp lý.
+    reason: Hedge ở mọi đoạn, không có đoạn nào khẳng định trực tiếp.
+  good_examples:
+  - mode: clean_rewrite
+    text: |-
+      Kết quả rõ ràng. Số liệu xác nhận. Phân tích chặt chẽ.
+
+      Tuy nhiên có lẽ cần kiểm chứng thêm. Có khả năng sai lệch. Dường như chưa đủ mẫu.
+
+      Kết luận khẳng định. Số liệu ủng hộ. Phân tích đầy đủ.
+
+      Báo cáo hoàn tất. Nhóm đã xác nhận. Không có sai sót.
+
+      Kết quả cuối cùng rõ ràng. Số liệu đã kiểm tra. Phân tích nhất quán.
+    reason: Hedge tập trung ở đoạn hai; các đoạn khác khẳng định trực tiếp.
+  - mode: no_change
+    text: |-
+      Có lẽ dự án sẽ trễ. Dường như tiến độ chậm. Có khả năng cần gia hạn.
+    reason: Hedge tập trung trong một đoạn ngắn cho một nhận định rủi ro.
+  exceptions:
+  - Văn bản khoa học cần nhiều hedge để thể hiện giới hạn của nghiên cứu.
+  - Trích dẫn nguyên văn.
+  false_positive_risk: high
+  tags:
+  - hedge
+  - do-tin-cay
+  - heuristic
+  min_occurrences: 1
+- id: VI-HUM-S09
+  name: lien-ke-nhanh-khong-chi-tiet
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: document
+  aggregation: count
+  severity: low
+  confidence: medium
+  summary: Cấu trúc "về mặt X" hoặc "khía cạnh Y" lặp lại để liệt kê nhanh nhiều khía cạnh mà không đi sâu vào khía cạnh nào.
+  signals:
+    regex:
+    - '\bvề mặt\s+\S+'
+    - '\bkhía cạnh\s+\S+'
+  why_it_matters: >-
+    Văn AI thường liệt kê "về mặt kinh tế... về mặt xã hội... về mặt môi trường..."
+    để tạo vẻ toàn diện, nhưng mỗi mục chỉ có một câu hời hợt. Người viết tự nhiên
+    tập trung vào 1-2 khía cạnh quan trọng và đi sâu.
+  rewrite_strategy:
+  - Chọn khía cạnh quan trọng nhất và triển khai sâu.
+  - Nếu thực sự cần liệt kê nhiều khía cạnh, bổ sung chi tiết cụ thể cho mỗi khía cạnh.
+  bad_examples:
+  - text: >-
+      Về mặt kinh tế, dự án có tiềm năng. Về mặt xã hội, dự án được ủng hộ.
+      Về mặt môi trường, dự án trung tính.
+    reason: Ba khía cạnh liệt kê nhanh, mỗi khía cạnh một câu hời hợt.
+  - text: >-
+      Khía cạnh tài chính cần xem xét. Khía cạnh kỹ thuật cũng vậy.
+      Khía cạnh nhân sự quan trọng.
+    reason: Ba khía cạnh liệt kê nhanh mà không đi sâu.
+  good_examples:
+  - mode: clean_rewrite
+    text: >-
+      Dự án có tiềm năng kinh tế; cụ thể, ước tính hoàn vốn sau 18 tháng với
+      doanh thu tăng 15% mỗi quý.
+    reason: Tập trung vào một khía cạnh và đi sâu với dữ kiện.
+  - mode: no_change
+    text: >-
+      Về mặt tài chính, dự án cần thêm 2 tỷ đồng cho giai đoạn hai, dự kiến
+      hoàn vốn sau 18 tháng.
+    reason: Một khía cạnh duy nhất, có chi tiết cụ thể.
+  exceptions:
+  - Văn bản so sánh có mục đích liệt kê cân bằng các khía cạnh với chi tiết cho mỗi mục.
+  - Trích dẫn nguyên văn hoặc báo cáo chính thức có quy định cấu trúc.
+  false_positive_risk: medium
+  tags:
+  - liet-ke
+  - khia-canh
+  - heuristic
+  min_occurrences: 3
+- id: VI-HUM-S10
+  name: doi-xung-so-muc
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: document
+  aggregation: single
+  severity: low
+  confidence: low
+  summary: Số lượng mục tích cực và tiêu cực bằng nhau một cách đối xứng ("3 ưu điểm và 3 nhược điểm").
+  signals:
+    regex:
+    - '\b\d+\s+(?:ưu điểm|điểm mạnh|lợi ích|cơ hội)\b'
+    - '\b\d+\s+(?:nhược điểm|điểm yếu|hạn chế|thách thức)\b'
+  why_it_matters: >-
+    Văn AI tạo cấu trúc đối xứng máy móc: 3 ưu điểm và 3 nhược điểm. Người viết
+    tự nhiên có thể có 2 ưu điểm và 5 nhược điểm, phản ánh đúng sự bất đối xứng
+    của vấn đề. Đối xứng hoàn hảo thường là dấu hiệu khuôn.
+  rewrite_strategy:
+  - Cho phép số mục hai nhánh khác nhau nếu vấn đề không thực sự cân.
+  - Bổ sung chi tiết cho mỗi nhánh thay vì đếm số mục.
+  bad_examples:
+  - text: Phân tích cho thấy 3 ưu điểm và 3 nhược điểm của phương án.
+    reason: Đối xứng chính xác 3-3, dấu hiệu khuôn.
+  - text: Báo cáo liệt kê 4 lợi ích và 4 hạn chế của chính sách.
+    reason: Đối xứng chính xác 4-4.
+  good_examples:
+  - mode: no_change
+    text: Phân tích cho thấy 3 ưu điểm và 5 nhược điểm của phương án.
+    reason: Số mục hai nhánh khác nhau, phản ánh thực tế.
+  - mode: no_change
+    text: Báo cáo liệt kê nhiều lợi ích và một số hạn chế của chính sách.
+    reason: Không đếm số cụ thể, tránh khuôn đối xứng.
+  exceptions:
+  - Văn bản so sánh có yêu cầu đối xứng theo quy định (ví dụ bảng so sánh có số dòng bằng nhau).
+  - Đề bài yêu cầu liệt kê cùng số mục.
+  false_positive_risk: high
+  tags:
+  - doi-xung
+  - liet-ke
+  - heuristic
+  min_occurrences: 1
+- id: VI-HUM-S11
+  name: noi-nhan-qua-day-dac
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: document
+  aggregation: count
+  severity: low
+  confidence: medium
+  summary: Từ nối nhân quả ("do đó", "bởi vậy", "kết quả là", "dẫn đến") xuất hiện dày trong văn bản.
+  signals:
+    phrases:
+    - do đó
+    - bởi vậy
+    - do vậy
+    - kết quả là
+    - dẫn đến
+    - thành ra
+  why_it_matters: >-
+    Văn AI nối mọi thứ bằng quan hệ nhân quả để tạo mạch lạc. Người viết tự nhiên
+    chỉ dùng khi quan hệ thực sự rõ. Nối dày làm văn bản cứng và có thể gán nhân
+    quả không tồn tại. Khác với VI-HUM-S03 (nhóm kết quả) và VI-HUM-S12 (nhóm
+    chuyển ý).
+  rewrite_strategy:
+  - Giữ từ nối chỉ khi quan hệ nhân quả thực sự rõ.
+  - Bỏ từ nối khi hai ý chỉ đứng cạnh nhau mà không nhân quả.
+  bad_examples:
+  - text: >-
+      Hệ thống chậm, do đó người dùng phàn nàn, dẫn đến nhóm phải họp,
+      kết quả là deadline bị lùi.
+    reason: Bốn từ nối nhân quả trong một câu, gán chuỗi nhân quả chưa chắc chắn.
+  - text: >-
+      Dữ liệu sai, bởi vậy báo cáo lệch. Kết quả là quyết định sai, dẫn đến
+      thiệt hại.
+    reason: Bốn từ nối nhân quả trong hai câu.
+  good_examples:
+  - mode: clean_rewrite
+    text: Hệ thống chậm khiến người dùng phàn nàn, nên nhóm phải họp và lùi deadline.
+    reason: Rút gọn từ nối, giữ quan hệ nhân quả chính.
+  - mode: no_change
+    text: Do đó, quyết định cuối cùng vẫn là chờ thêm dữ liệu.
+    reason: Một từ nối nhân quả cho quan hệ rõ.
+  exceptions:
+  - Văn bản phân tích nhân quả chặt chẽ có mục đích lập luận.
+  - Trích dẫn nguyên văn.
+  false_positive_risk: medium
+  tags:
+  - tu-noi
+  - nhan-qua
+  - heuristic
+  min_occurrences: 4
+- id: VI-HUM-D06
+  name: cam-xuc-phang
+  skill: humanizer-vi
+  category: discourse
+  finding_type: heuristic
+  scope: document
+  aggregation: variance
+  severity: low
+  confidence: low
+  summary: Văn bản nói về chủ đề cảm xúc mạnh nhưng giọng điệu không thay đổi — không có câu ngắn đột ngột, không có từ ngữ đời thường, không có sự im lặng.
+  signals:
+    regex:
+    - '(?!)'
+  why_it_matters: >-
+    Văn AI nói về cảm xúc như người quan sát bên ngoài, không như người đang
+    trải qua. Người viết tự nhiên có nhịp điệu gãy khi cảm xúc lên cao: câu ngắn,
+    câu cụt, dấu ba chấm, từ ngữ thô.
+  rewrite_strategy:
+  - Cho phép một vài câu ngắn đột ngột khi nội dung chạm tới cảm xúc mạnh.
+  - Thêm chi tiết cụ thể (không phải ví dụ mới) nếu câu chuyện có.
+  bad_examples:
+  - text: >-
+      Tôi đã trải qua một giai đoạn khó khăn trong sự nghiệp. Mọi thứ diễn ra không như mong đợi.
+      Tuy nhiên, tôi đã học được nhiều bài học quý giá. Những bài học này đã giúp tôi trưởng thành.
+      Tôi tin rằng mọi khó khăn đều mang lại cơ hội.
+    reason: Chủ đề khó khăn nhưng giọng đều và tích cực một cách máy móc.
+  - text: >-
+      Khi biết tin ông qua đời, tôi rất buồn. Tôi đã dành thời gian để suy nghĩ về những kỷ niệm.
+      Những kỷ niệm này rất quý giá với tôi. Tôi sẽ luôn ghi nhớ chúng trong tim.
+    reason: Ba câu sau cùng cấu trúc, không có câu ngắn đột ngột.
+  good_examples:
+  - mode: review_comment
+    text: Cần xem lại giọng điệu — chủ đề là mất mát/khó khăn nhưng văn bản không có câu ngắn, từ ngữ đời thường, hay sự im lặng. Có thể thêm nhịp gãy khi cảm xúc lên cao.
+    reason: Gợi ý reviewer xem lại, không tự viết lại câu.
+  - mode: no_change
+    text: >-
+      Tôi vừa mất việc. Mấy hôm đầu tôi không biết làm gì. Sau đó tôi bắt đầu gửi CV,
+      và dần thấy nhẹ hơn.
+    reason: Chủ đề tiêu cực, giọng điệu chuyển dần, không phải văn AI phẳng.
+  exceptions:
+  - Văn bản học thuật hoặc báo chí khách quan cố ý giữ giọng đều.
+  - Văn bản có chủ đề cảm xúc nhưng register formal cần đều giọng.
+  false_positive_risk: high
+  tags:
+  - cam-xuc
+  - dien-ngon
+  - llm-judge
+  min_occurrences: 1
+- id: VI-HUM-D07
+  name: cam-xuc-khong-nhat-quan
+  skill: humanizer-vi
+  category: discourse
+  finding_type: heuristic
+  scope: document
+  aggregation: single
+  severity: low
+  confidence: low
+  summary: Nội dung nói điều buồn nhưng giọng văn vui, hoặc ngược lại — cảm xúc của nội dung và giọng văn không nhất quán.
+  signals:
+    regex:
+    - '(?!)'
+  why_it_matters: >-
+    Văn AI không có trạng thái nội tại để giữ cảm xúc nhất quán. Nó có thể nói về
+    mất mát với giọng hào hứng, hoặc nói về thành công với giọng hoài nghi — dấu
+    hiệu rõ của văn sinh bởi mô hình.
+  rewrite_strategy:
+  - Điều chỉnh giọng văn cho khớp với nội dung.
+  - Nếu có lý do nghệ thuật cho sự không nhất quán, làm rõ lý do đó trong câu.
+  bad_examples:
+  - text: >-
+      Tôi vừa mất việc và điều này thật tuyệt vời! Đây là cơ hội vàng để tôi khám phá
+      những con đường mới. Tôi vô cùng hào hứng với tương lai.
+    reason: Mất việc nhưng giọng hào hứng — không nhất quán.
+  - text: >-
+      Dự án thất bại thảm hại. Thật may mắn khi chúng tôi có cơ hội học hỏi từ sai lầm này.
+      Tôi rất vui vì những bài học thu được.
+    reason: Thất bại nhưng giọng vui — không tự nhiên.
+  good_examples:
+  - mode: clean_rewrite
+    text: >-
+      Tôi vừa mất việc. Tôi chưa biết phải làm gì tiếp theo.
+    reason: Giọng văn khớp với nội dung tiêu cực.
+  - mode: no_change
+    text: >-
+      Dự án thất bại. Chúng tôi mất ba tháng và một khoản ngân sách không nhỏ.
+      Nhưng ít nhất giờ tôi biết cách nào không hiệu quả.
+    reason: Nội dung tiêu cực, giọng chuyển dần sang trung tính hợp lý.
+  exceptions:
+  - Văn trào phúng (satire) có chủ đích không nhất quán giữa nội dung và giọng.
+  - Trích dẫn phản ứng của người khác.
+  false_positive_risk: medium
+  tags:
+  - cam-xuc
+  - nhat-quan
+  - llm-judge
+  min_occurrences: 1
+- id: VI-HUM-S13
+  name: dong-kin-ngu-nghia
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: document
+  aggregation: variance
+  severity: low
+  confidence: low
+  summary: Hầu hết các đoạn kết bằng câu tóm tắt hoặc kết luận — văn bản không có chỗ "mở" nào, không có câu hỏi bỏ lửng, không có ý chưa hoàn thành.
+  signals:
+    regex:
+    - '(?!)'
+  why_it_matters: >-
+    Văn AI luôn đóng ý — kết đoạn bằng tóm tắt, kết bài bằng kết luận. Người viết
+    tự nhiên có thể kết đoạn bằng câu hỏi, bằng chi tiết nhỏ, bằng câu bỏ lửng,
+    hoặc bằng ý chưa triển khai hết.
+  rewrite_strategy:
+  - Cho phép một vài đoạn kết bằng câu hỏi hoặc chi tiết cụ thể thay vì tóm tắt.
+  - Không cần kết luận cho mọi đoạn nếu ý đã rõ.
+  bad_examples:
+  - text: >-
+      Đoạn một bàn về vấn đề A. Chúng ta có thể thấy rằng vấn đề này quan trọng và cần giải quyết.
+
+      Đoạn hai phân tích vấn đề B. Tóm lại, vấn đề B cần được xử lý sớm.
+
+      Đoạn ba đề cập vấn đề C. Vì vậy, cần có giải pháp cho vấn đề C.
+    reason: Mọi đoạn đều kết bằng tóm tắt — semantic closure.
+  - text: >-
+      Bước một là chuẩn bị. Vậy bước một rất quan trọng.
+
+      Bước hai là triển khai. Tóm lại, triển khai cần chú ý.
+
+      Bước ba là kiểm tra. Kết luận là kiểm tra không thể bỏ qua.
+    reason: Ba đoạn, ba closure endings.
+  good_examples:
+  - mode: clean_rewrite
+    text: >-
+      Đoạn một bàn về vấn đề A.
+
+      Đoạn hai phân tích vấn đề B. Tại sao B lại quan trọng hơn A?
+
+      Đoạn ba đề cập vấn đề C.
+    reason: Có đoạn kết bằng câu hỏi, không phải tóm tắt.
+  - mode: no_change
+    text: >-
+      Bước một là chuẩn bị.
+
+      Bước hai là triển khai. Cái khó là ở đây.
+
+      Bước ba là kiểm tra.
+    reason: Đoạn hai kết bằng chi tiết cụ thể, không phải tóm tắt.
+  exceptions:
+  - Văn bản học thuật hoặc báo cáo chính thức có quy định mỗi đoạn kết bằng tóm tắt.
+  - Trích dẫn hoặc mục lục có cấu trúc cố định.
+  false_positive_risk: medium
+  tags:
+  - dien-ngon
+  - closure
+  - llm-judge
+  min_occurrences: 1
+- id: VI-HUM-L07
+  name: do-tinh-vi-mo-coi
+  skill: humanizer-vi
+  category: lexical
+  finding_type: heuristic
+  scope: document
+  aggregation: count
+  severity: low
+  confidence: low
+  summary: Có ẩn dụ, so sánh, hoặc hình ảnh nhưng các câu xung quanh không "nuôi" ẩn dụ đó — ẩn dụ đứng một mình, mồ côi.
+  signals:
+    regex:
+    - '(?!)'
+  why_it_matters: >-
+    Người viết dùng ẩn dụ thì cả đoạn xoay quanh ẩn dụ đó. Văn AI dùng ẩn dụ
+    "mồ côi": câu trước và sau không liên quan tới ẩn dụ, khiến nó trông trang
+    trí nhưng rỗng.
+  rewrite_strategy:
+  - Mở rộng ẩn dụ bằng cách cho các câu xung quanh liên quan tới nó.
+  - Hoặc bỏ ẩn dụ nếu không thể triển khai.
+  bad_examples:
+  - text: >-
+      Dự án này là một con thuyền nhỏ giữa biển lớn. Ngân sách đã được phê duyệt.
+      Đội ngũ có mười thành viên. Thời hạn kéo dài sáu tháng.
+    reason: Ẩn dụ "con thuyền" bị bỏ rơi ngay câu sau.
+  - text: >-
+      Chiến lược mới như một con chim đại bàng. Chúng tôi sẽ tập trung vào phân khúc khách hàng
+      trẻ. Marketing sẽ dùng TikTok và Instagram.
+    reason: Ẩn dụ đại bàng không được khai thác.
+  good_examples:
+  - mode: clean_rewrite
+    text: >-
+      Dự án như con thuyền nhỏ giữa biển lớn: ngân sách là nhiên liệu, đội ngũ là
+      thủy thủ, và sáu tháng là khoảng cách bờ.
+    reason: Cả đoạn xoay quanh ẩn dụ.
+  - mode: no_change
+    text: >-
+      Ngân sách đã được phê duyệt. Đội ngũ có mười thành viên. Thời hạn kéo dài sáu tháng.
+    reason: Không có ẩn dụ — không có gì để nuôi.
+  exceptions:
+  - Văn thơ hoặc văn nghệ thuật có ẩn dụ độc lập có chủ đích.
+  - Slogan hoặc khẩu hiệu.
+  false_positive_risk: high
+  tags:
+  - an-du
+  - dien-ngon
+  - llm-judge
+  min_occurrences: 1
+- id: VI-HUM-D08
+  name: echo-noi-dung
+  skill: humanizer-vi
+  category: discourse
+  finding_type: heuristic
+  scope: document
+  aggregation: count
+  severity: low
+  confidence: low
+  summary: Cùng một ý được nói lại bằng từ khác ở các đoạn khác nhau, không phải lặp từ mà lặp ý niệm.
+  signals:
+    regex:
+    - '(?!)'
+  why_it_matters: >-
+    Văn AI tự "vang" (echo) chính nó — lặp lại cùng một ý bằng cách diễn đạt khác
+    để trông đầy đủ. Người viết tự nhiên thường mở rộng ý (elaboration) hoặc bỏ
+    hẳn, không lặp.
+  rewrite_strategy:
+  - Gộp các câu cùng ý thành một câu duy nhất.
+  - Hoặc mở rộng ý đó bằng chi tiết mới thay vì lặp lại.
+  bad_examples:
+  - text: >-
+      Dự án cần thêm ngân sách để hoàn thành.
+
+      Chúng tôi đang thiếu nguồn lực tài chính cho dự án.
+
+      Vấn đề chính là dự án chưa có đủ tiền.
+    reason: Ba câu cùng ý, khác từ ngữ.
+  - text: >-
+      Đội ngũ cần được đào tạo thêm về kỹ thuật mới.
+
+      Kỹ năng của nhân viên cần được nâng cao.
+
+      Nhân sự cần học thêm công nghệ.
+    reason: Ba câu cùng ý về việc học thêm.
+  good_examples:
+  - mode: clean_rewrite
+    text: Dự án cần thêm ngân sách để hoàn thành — cụ thể là khoảng 200 triệu cho giai đoạn hai.
+    reason: Gộp ba câu thành một, thêm chi tiết cụ thể.
+  - mode: no_change
+    text: >-
+      Dự án cần thêm ngân sách để hoàn thành.
+
+      Đội ngũ cũng cần thêm hai kỹ sư.
+    reason: Hai ý khác nhau, không echo.
+  exceptions:
+  - Điệp ngữ (anaphora) có chủ đích trong văn nghị luận hoặc thơ.
+  - Văn bản nhiều phần cố ý nhắc lại ý chính.
+  false_positive_risk: medium
+  tags:
+  - echo
+  - lap-y
+  - llm-judge
+  min_occurrences: 1
+- id: VI-HUM-D09
+  name: phan-xa-tra-loi-tron-ven
+  skill: humanizer-vi
+  category: discourse
+  finding_type: heuristic
+  scope: document
+  aggregation: single
+  severity: low
+  confidence: low
+  summary: Nếu văn bản bắt đầu bằng câu hỏi hoặc nhiệm vụ, nó trả lời đầy đủ + giải thích + ví dụ + kết luận — không có chỗ nào lệch khỏi câu hỏi.
+  signals:
+    regex:
+    - '(?!)'
+  why_it_matters: >-
+    Văn AI "hoàn thành nhiệm vụ" trọn vẹn: trả lời hết, giải thích đủ, cho ví dụ,
+    kết luận rõ. Người viết tự nhiên có thể trả lời cụt, trả lời lệch, hoặc trả
+    lời bằng câu hỏi khác.
+  rewrite_strategy:
+  - Cho phép văn bản dừng ở câu trả lời trực tiếp nếu không cần mở rộng.
+  - Hoặc trả lời lệch nếu câu hỏi gợi ra hướng khác quan trọng hơn.
+  bad_examples:
+  - text: >-
+      Câu hỏi: Tại sao dự án thất bại?
+
+      Dự án thất bại vì ba lý do. Thứ nhất, thiếu ngân sách. Thứ hai, nhân sự yếu.
+      Thứ ba, kế hoạch không rõ. Ví dụ, giai đoạn hai không có người phụ trách.
+      Như vậy, có thể kết luận rằng thất bại là do nhiều yếu tố.
+    reason: Trả lời đầy đủ + giải thích + ví dụ + kết luận, hoàn toàn trọn vẹn.
+  - text: >-
+      Làm thế nào để cải thiện quy trình?
+
+      Có nhiều cách để cải thiện. Trước tiên, cần đánh giá hiện trạng. Tiếp theo,
+      xác định điểm nghẽn. Sau đó, áp dụng cải tiến. Cuối cùng, đo lường kết quả.
+    reason: Trả lời theo bốn bước, kết cấu hoàn hảo.
+  good_examples:
+  - mode: clean_rewrite
+    text: Dự án thất bại vì thiếu ngân sách cho giai đoạn hai.
+    reason: Trả lời trực tiếp, không mở rộng.
+  - mode: no_change
+    text: >-
+      Làm thế nào để cải thiện quy trình?
+
+      Câu hỏi hay. Nhưng trước khi trả lời, tôi cần biết quy trình hiện tại đang gặp vấn đề gì.
+    reason: Không trả lời trực tiếp, hỏi ngược lại.
+  exceptions:
+  - Văn bản học thuật có yêu cầu trả lời đầy đủ theo rubric.
+  - Hướng dẫn kỹ thuật có cấu trúc cố định.
+  false_positive_risk: high
+  tags:
+  - qa-reflex
+  - dien-ngon
+  - llm-judge
+  min_occurrences: 1
+- id: VI-HUM-S14
+  name: liet-ke-thu-tu-day-dac
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: document
+  aggregation: count
+  severity: low
+  confidence: medium
+  summary: Dùng dày "thứ nhất/thứ hai/thứ ba" hoặc các biến thể liệt kê để chia ý, dấu hiệu listification của văn AI.
+  signals:
+    regex:
+    - '(?!)'
+  why_it_matters: >-
+    Văn AI chia mọi ý thành "thứ nhất, thứ hai, thứ ba" để trông có cấu trúc.
+    Người viết tự nhiên dùng marker khi cần thiết, có thể bỏ qua marker ở ý giữa,
+    hoặc diễn đạt bằng từ nối đa dạng.
+  rewrite_strategy:
+  - Chỉ giữ marker khi thứ tự thật sự quan trọng.
+  - Bỏ marker ở các ý có thể liệt kê tự nhiên.
+  - Đa dạng hóa cách liên kết ý thay vì thuần "thứ nhất... thứ hai... thứ ba".
+  bad_examples:
+  - text: >-
+      Dự án thất bại vì ba lý do. Thứ nhất, ngân sách không đủ. Thứ hai, đội ngũ thiếu người.
+      Thứ ba, kế hoạch không rõ.
+    reason: Ba markers "thứ nhất/hai/ba" liên tiếp.
+  - text: >-
+      Có ba điểm cần lưu ý. Thứ nhất là deadline. Thứ hai là ngân sách. Thứ ba là nhân sự.
+    reason: Cấu trúc liệt kê đối xứng, mỗi mục gần bằng nhau.
+  good_examples:
+  - mode: clean_rewrite
+    text: Dự án thất bại. Ngân sách không đủ, đội ngũ thiếu người, và kế hoạch không rõ.
+    reason: Bỏ markers, giữ nguyên nội dung.
+  - mode: no_change
+    text: >-
+      Có hai điểm cần lưu ý. Thứ nhất là deadline tháng 8 không thể dời. Thứ hai,
+      ngân sách đã chốt từ tháng 6.
+    reason: Chỉ 2 markers, dưới ngưỡng.
+  exceptions:
+  - Quy trình, luật, hướng dẫn kỹ thuật cần liệt kê theo thứ tự.
+  - Đề bài yêu cầu rõ "liệt kê 3 điểm".
+  false_positive_risk: medium
+  tags:
+  - liet-ke
+  - cau-truc
+  - heuristic
+  min_occurrences: 3
