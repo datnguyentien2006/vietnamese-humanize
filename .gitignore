@@ -26,6 +26,11 @@ node_modules/
 .vercel/
 web/frontend/.env*.local
 
+# Model training
+training/data/
+training/output/
+*.safetensors
+
 # Python backend
 web/backend/.env
 web/backend/.venv/

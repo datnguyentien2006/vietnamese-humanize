@@ -1,0 +1,14 @@
+# Dùng cho Colab/Kaggle hoặc máy có GPU. Cài đặt: pip install -r training/requirements.txt
+# torch đã có sẵn trên Colab; nếu tự cài thì chọn bản khớp CUDA của GPU.
+transformers>=4.46,<6
+accelerate>=1.0,<2
+peft>=0.13,<1
+trl>=0.17,<0.24
+bitsandbytes>=0.44 ; platform_machine == "x86_64"
+datasets>=3.0,<5
+pyyaml>=6.0
+pandas>=2.0           # đọc corpus .parquet
+# Cần cho --export-awq (không bắt buộc khi chỉ train):
+# autoawq>=0.2.6
+# Cần cho server vLLM giờ chạy trên máy host endpoint, KHÔNG cài trong Colab:
+# vllm>=0.6.0

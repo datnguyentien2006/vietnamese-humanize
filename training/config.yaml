@@ -1,0 +1,55 @@
+# Configuration for the Vietnamese humanizer fine-tune.
+# Values are tuned for a free Colab/Kaggle T4 (16 GB). See training/README.md.
+
+model:
+  # Full (non-quantized) checkpoint used for QLoRA training. We train against
+  # this because AWQ checkpoints cannot be QLoRA-trained; the AWQ variant is
+  # produced afterwards by merge_and_export.py --export-awq.
+  training_model_id: Qwen/Qwen2.5-14B-Instruct
+  # Use this instead when the T4 runs out of memory with the 14B model.
+  fallback_model_id: Qwen/Qwen2.5-7B-Instruct
+  # Format of the artifact the self-hosted vLLM endpoint will serve.
+  serve_format: awq
+
+dataset:
+  # Files or directories with human-written Vietnamese text.
+  # Accepted shapes: .txt, .txt.gz, .parquet (text_column), .jsonl (text_column).
+  source_paths: ["training/data/raw"]
+  text_column: text
+  mode: continuation      # continuation (style SFT) | pairs (curated rewrite pairs)
+  pairs_file: training/data/pairs/humanized_pairs.jsonl
+  min_words: 30           # drop samples below this length
+  max_words: 400          # split longer documents into paragraph chunks
+  train_ratio: 0.95       # remainder becomes the validation split
+  dedupe: true            # near-duplicate removal on normalized text
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  bias: none
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+
+train:
+  seq_len: 1024
+  epochs: 1
+  lr: 2.0e-4
+  per_device_batch_size: 1
+  grad_accumulation: 16   # effective batch = 16 on a single T4
+  warmup_ratio: 0.03
+  lr_scheduler: cosine
+  fp16: true              # T4 has no bf16; leave true on Colab free
+  gradient_checkpointing: true
+  logging_steps: 10
+
+output:
+  adapter_dir: training/output/humanizer-lora
+  merged_dir: training/output/humanizer-merged
+  awq_dir: training/output/humanizer-awq

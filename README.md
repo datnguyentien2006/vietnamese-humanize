@@ -5,10 +5,30 @@ Tools for editing Vietnamese prose without changing its facts. This repository c
 - **A web application** — a FastAPI backend + Next.js frontend that lints a text, then helps you fix each issue manually or with AI.
 - **`viet-writing-lint`, a rule-based linting CLI** for Vietnamese prose (this project's Python package is `vietnamese-writing-skills`, imported as `vietnamese_writing_skills`).
 - **`humanize.py`, a standalone CLI** that rewrites a whole document with an LLM using the bundled `skills/humanizer-vi/SKILL.md` prompt.
+- **`training/`, a fine-tuning pipeline (under construction)** for a dedicated Vietnamese humanizer model — dataset prep from human-written corpora, QLoRA training, and AWQ export for a self-hosted vLLM endpoint.
 
 The linter does not classify authorship, produce an "AI probability score," or offer detector-evasion advice. It reports surface signals for a person to review.
 
 Based on [longhang2004/vietnamese-humanizer](https://github.com/longhang2004/vietnamese-humanizer) (MIT). This fork keeps the lint/pattern foundation and replaces the original rewrite pipeline with a Groq-powered, issue-oriented editing workflow (see [Changelog of this fork](#fork-changes)).
+
+## Where this is heading: a fine-tuned humanizer model
+
+Per-issue rewrite prompts with Groq plateau around a 15–20% AI-detection
+score — good, but not the goal. The next step (tracked in
+[ROADMAP.md](ROADMAP.md)) is to train a model dedicated to this task:
+
+- **Training data:** naturally written human Vietnamese text, so the model
+  learns how people actually write instead of copying a generic assistant voice.
+- **Inference flow on the site:** submit AI-generated text → the fine-tuned
+  model rewrites it → you review the humanized result → edit manually if the
+  result is not natural enough.
+- **Meaning and facts stay put:** numbers, dates, and names are checked
+  mechanically after every rewrite, and unclear figures get "explain the
+  source" suggestions from the report analyzer.
+- Engine: QLoRA fine-tune of Qwen2.5-14B-Instruct, exported to AWQ and served
+  from a self-hosted vLLM endpoint. Everything lives under [`training/`](training/README.md).
+
+Until the trained model is ready, the web app keeps the current Groq pipeline.
 
 ## How the web app works
 
@@ -130,6 +150,7 @@ web/backend   FastAPI app (lint, patterns, skills, rewrite, suggest-fix, report 
 web/frontend  Next.js app (editor, issue cards, compare view, report refiner)
 docs/         generated pattern documentation (docs/generated-patterns.md)
 humanize.py   standalone document rewriter CLI
+training/     fine-tune pipeline for the dedicated humanizer model (see training/README.md)
 ```
 
 ## Contributing
@@ -149,4 +170,5 @@ Differences from upstream in this fork:
 - Added the **Report Refiner** scan/refine/diff workflow and the formal→casual vocabulary advisor.
 - Linter: added start/end/paragraph/sentence enrichment per occurrence, new heuristic patterns (Chinese-source-word filler density, uniform sentence rhythm, hedge spread, symmetry bias, over-enumeration, title-case abuse), and the `--deep` LLM judge.
 - Added `humanize.py` (two-pass document rewriter) and the anti-perfection checklist / signs-of-AI references for the humanizer skill.
+- Started the dedicated-model pipeline: `training/` (dataset prep, QLoRA fine-tune, AWQ export, vLLM serving guide) — see [ROADMAP.md](ROADMAP.md).
 - Removed upstream's examples corpus, benchmarks, maintainer docs, release tooling, and donation assets that this fork does not use.

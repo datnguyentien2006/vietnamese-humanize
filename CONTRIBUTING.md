@@ -40,6 +40,23 @@ Style: run `ruff check .` before committing Python changes. Keep changes consist
 - **No detector-evasion features.** Contributions that add "AI score", authorship detection, or evasion advice will be rejected.
 - Keep Web UI text in Vietnamese (the app's audience is Vietnamese writers); code comments may be English or Vietnamese.
 
+## Contribute human-written Vietnamese text (highest-value contribution)
+
+The fine-tuning pipeline in [`training/`](training/README.md) needs one thing
+above all: naturally written Vietnamese prose. If you want to help:
+
+1. Put plain-text files (30–400 word chunks work best) into `training/data/raw/`
+   — `.txt`, `.txt.gz`, or `.jsonl`/`.parquet` with a `text` column.
+2. Only submit text you have the right to share for training, and note its
+   origin in the PR description (site/book/corpus + license).
+3. Machine-translated or AI-generated text contaminates the whole corpus —
+   write a line about why you believe the text is human-written.
+4. Do not commit downloads of large licensed corpora; open an issue with the
+   source instead, and we will handle the agreement.
+
+Also valuable: accepted rewrites from the app's review workflow exported as
+`{"input", "output"}` pairs for phase 3 (`training/data/pairs/`).
+
 ## Pull requests
 
 1. Fork, create a feature branch (`feat/report-refiner-fix`, not `patch-1`).
