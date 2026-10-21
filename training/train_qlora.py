@@ -135,7 +135,13 @@ def main() -> None:
             dataset_num_proc=2,
         )
     except TypeError:
-        # newer trl renamed max_seq_length -> max_length
+        # newer trl (>=0.21): max_seq_length -> max_length, warmup_ratio removed
+        est_units = max(
+            1,
+            len(dataset["train"]) // max(1, train_cfg["per_device_batch_size"] * train_cfg["grad_accumulation"]),
+        )
+        warmup_steps = max(1, int(round(train_cfg["warmup_ratio"] * est_units * train_cfg["epochs"])))
+        print(f"[compat] warmup_ratio -> warmup_steps={warmup_steps} (trl >= 0.21)")
         sft_config = SFTConfig(
             output_dir="training/output/checkpoints",
             max_length=train_cfg["seq_len"],
@@ -144,7 +150,7 @@ def main() -> None:
             optim="paged_adamw_8bit",
             per_device_train_batch_size=train_cfg["per_device_batch_size"],
             gradient_accumulation_steps=train_cfg["grad_accumulation"],
-            warmup_ratio=train_cfg["warmup_ratio"],
+            warmup_steps=warmup_steps,
             lr_scheduler_type=train_cfg["lr_scheduler"],
             fp16=train_cfg["fp16"],
             bf16=False,
