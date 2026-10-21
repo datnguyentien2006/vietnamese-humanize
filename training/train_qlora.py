@@ -124,8 +124,7 @@ def main() -> None:
             fp16=train_cfg["fp16"],
             bf16=False,
             logging_steps=train_cfg["logging_steps"],
-            eval_strategy="steps",
-            eval_steps=0.2,
+            eval_strategy="no",
             save_strategy="steps",
             save_steps=0.5,
             save_total_limit=2,
@@ -155,8 +154,7 @@ def main() -> None:
             fp16=train_cfg["fp16"],
             bf16=False,
             logging_steps=train_cfg["logging_steps"],
-            eval_strategy="steps",
-            eval_steps=0.2,
+            eval_strategy="no",
             save_strategy="steps",
             save_steps=0.5,
             save_total_limit=2,
@@ -170,7 +168,6 @@ def main() -> None:
         model=model,
         args=sft_config,
         train_dataset=dataset["train"],
-        eval_dataset=dataset["val"],
         processing_class=tokenizer,
     )
 
