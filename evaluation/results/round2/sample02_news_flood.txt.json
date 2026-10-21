@@ -1,0 +1,108 @@
+{
+  "name": "Lũ lụt miền Trung",
+  "file": "sample02_news_flood.txt",
+  "flavour": "news",
+  "description": "Mẫu tin tức kiểu AI - cấu trúc cúm xưng đều đặn, số liệu cụ thể để kiểm tra bảo toàn thông tin",
+  "original": "Trong những ngày qua, mưa lũ đã gây thiệt hại nặng nề cho các tỉnh miền Trung. Theo đó, nhiều hộ gia đình phải sơ tán khẩn cấp. Bên cạnh đó, giao thông bị tắc nghẽn nghiêm trọng. Điều này cho thấy sức tàn phá của thiên tai là rất lớn.\n\nCụ thể, tỉnh Quảng Nam ghi nhận lượng mưa 480 mm trong 24 giờ ngày 22/10/2025. Ngoài ra, sông Thu Bồn vượt báo động cấp 3. Đồng thời, chính quyền địa phương đã di dời 1.250 hộ dân tới nơi an toàn. Chính vì vậy, các lực lượng cứu hộ đã được điều động đến hiện trường. Từ đó cho thấy tinh thần tương trợ của cộng đồng là rất đáng trân trọng. Nhìn chung, tình hình diễn biến còn phức tạp.",
+  "rewritten": "Trong những ngày qua, mưa lũ đã gây thiệt hại nặng nề cho các tỉnh miền Trung. Theo đó, nhiều hộ gia đình phải sơ tán khẩn cấp. Giao thông bị tắc nghẽn nghiêm trọng. Sức tàn phá của thiên tai là rất lớn.\n\nCụ thể, tỉnh Quảng Nam ghi nhận lượng mưa 480 mm trong 24 giờ ngày 22/10/2025. Sông Thu Bồn vượt báo động cấp 3. Chính quyền địa phương đã di dời 1.250 hộ dân tới nơi an toàn. Các lực lượng cứu hộ đã được điều động đến hiện trường. Tinh thần tương trợ của cộng đồng là rất đáng trân trọng. Tình hình diễn biến còn phức tạp.",
+  "rewrite_stats": {
+    "total_issues": 1,
+    "fixed": 7,
+    "skipped": -6,
+    "edits_applied": 7,
+    "edits_rejected": 0,
+    "verification_attempts": 0,
+    "verification_passed": true
+  },
+  "applied_edits": [
+    {
+      "issue_pattern_id": "VI-HUM-S16",
+      "find_preview": "Bên cạnh đó, giao thông bị tắc nghẽn nghiêm trọng.",
+      "replace_preview": "Giao thông bị tắc nghẽn nghiêm trọng.",
+      "reason": "Xóa liên từ không cần thiết"
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S16",
+      "find_preview": "Điều này cho thấy sức tàn phá của thiên tai là rất lớn.",
+      "replace_preview": "Sức tàn phá của thiên tai là rất lớn.",
+      "reason": "Loại bỏ liên từ dư thừa"
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S16",
+      "find_preview": "Ngoài ra, sông Thu Bồn vượt báo động cấp 3.",
+      "replace_preview": "Sông Thu Bồn vượt báo động cấp 3.",
+      "reason": "Bớt liên từ không cần"
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S16",
+      "find_preview": "Đồng thời, chính quyền địa phương đã di dời 1.250 hộ dân tới nơi an toàn.",
+      "replace_preview": "Chính quyền địa phương đã di dời 1.250 hộ dân tới nơi an toàn.",
+      "reason": "Giảm số liên từ"
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S16",
+      "find_preview": "Chính vì vậy, các lực lượng cứu hộ đã được điều động đến hiện trường.",
+      "replace_preview": "Các lực lượng cứu hộ đã được điều động đến hiện trường.",
+      "reason": "Loại bỏ liên từ thừa"
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S16",
+      "find_preview": "Từ đó cho thấy tinh thần tương trợ của cộng đồng là rất đáng trân trọng.",
+      "replace_preview": "Tinh thần tương trợ của cộng đồng là rất đáng trân trọng.",
+      "reason": "Xóa liên từ không cần"
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S16",
+      "find_preview": "Nhìn chung, tình hình diễn biến còn phức tạp.",
+      "replace_preview": "Tình hình diễn biến còn phức tạp.",
+      "reason": "Bớt liên từ"
+    }
+  ],
+  "unresolved_issues": [
+    {
+      "pattern_id": "VI-HUM-S06",
+      "line": 3,
+      "column": 1,
+      "message": "Đoạn văn dài nhưng không có đại từ nhân xưng hoặc từ nối đối thoại; giọng hoàn toàn khách quan, dấu hiệu của văn AI."
+    }
+  ],
+  "latency_seconds": 22.0,
+  "static": {
+    "meaning": {
+      "entities_total": 8,
+      "entities_missing": [],
+      "entities_added": [],
+      "score": 1.0
+    },
+    "readability_before": {
+      "word_count": 128,
+      "sentence_count": 10,
+      "sentence_len_mean": 12.8,
+      "sentence_len_stdev": 2.79,
+      "type_token_ratio": 0.812
+    },
+    "readability_after": {
+      "word_count": 108,
+      "sentence_count": 10,
+      "sentence_len_mean": 10.8,
+      "sentence_len_stdev": 3.12,
+      "type_token_ratio": 0.852
+    },
+    "sentence_len_stdev_delta": 0.33,
+    "length_ratio": 0.844,
+    "robotic_density_before": 6.25,
+    "robotic_density_after": 0.93,
+    "lint_issues_before": 1,
+    "lint_issues_after": 1
+  },
+  "llm_judge": {
+    "naturalness": 9.0,
+    "meaning_preserved": 10.0,
+    "tone_preserved": 8.0,
+    "factual_losses": [],
+    "unnatural_phrases": [],
+    "note": "Bản viết lại giữ đầy đủ thông tin, chỉ thiếu một vài từ nối khiến giọng hơi giảm so với bản gốc.",
+    "judge_model": "openai/gpt-oss-120b"
+  },
+  "timestamp": "2026-10-21T23:13:28.101964+00:00"
+}

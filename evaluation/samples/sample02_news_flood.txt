@@ -1,0 +1,8 @@
+---
+name: Lũ lụt miền Trung
+flavour: news
+description: Mẫu tin tức kiểu AI - cấu trúc cúm xưng đều đặn, số liệu cụ thể để kiểm tra bảo toàn thông tin
+---
+Trong những ngày qua, mưa lũ đã gây thiệt hại nặng nề cho các tỉnh miền Trung. Theo đó, nhiều hộ gia đình phải sơ tán khẩn cấp. Bên cạnh đó, giao thông bị tắc nghẽn nghiêm trọng. Điều này cho thấy sức tàn phá của thiên tai là rất lớn.
+
+Cụ thể, tỉnh Quảng Nam ghi nhận lượng mưa 480 mm trong 24 giờ ngày 22/10/2025. Ngoài ra, sông Thu Bồn vượt báo động cấp 3. Đồng thời, chính quyền địa phương đã di dời 1.250 hộ dân tới nơi an toàn. Chính vì vậy, các lực lượng cứu hộ đã được điều động đến hiện trường. Từ đó cho thấy tinh thần tương trợ của cộng đồng là rất đáng trân trọng. Nhìn chung, tình hình diễn biến còn phức tạp.

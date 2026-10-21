@@ -1,0 +1,94 @@
+{
+  "name": "Câu chuyện chuyển đổi số",
+  "file": "sample01_information_technology.txt",
+  "flavour": "business_blog",
+  "description": "Blog doanh nghiệp kiểu AI - câu lệch đều, nhiều cụm nối máy móc, có số liệu và tên dự án",
+  "original": "Trong bối cảnh chuyển đổi số diễn ra nhanh chóng, doanh nghiệp cần có chiến lược rõ ràng. Tổng thể, việc ứng dụng công nghệ giúp tối ưu hóa quy trình vận hành một cách đáng kể. Điều này cho thấy tầm quan trọng của công nghệ trong thời đại mới. Bên cạnh đó, đào tạo nhân sự cũng là yếu tố quan trọng không kém.\n\nNói cách khác, doanh nghiệp muốn thành công phải đầu tư đồng bộ. Theo đó, các nhà lãnh đạo cần xác định lộ trình cụ thể. Công ty TNHH An Phát triển khai dự án \"Chuyển đổi số toàn diện 2025\" từ tháng 3 năm 2024, đạt 72% tiến độ vào quý 3/2025, với ngân sách 8,5 tỷ đồng. Nhìn chung, kết quả bước đầu là tích cực. Điều này đồng nghĩa với việc doanh nghiệp cần tiếp tục theo đuổi mục tiêu đề ra.",
+  "rewritten": "Trong bối cảnh chuyển đổi số diễn ra nhanh chóng, doanh nghiệp cần có chiến lược rõ ràng. Việc ứng dụng công nghệ giúp tối ưu hóa quy trình vận hành một cách đáng kể, cho thấy tầm quan trọng của công nghệ trong thời đại mới, và đào tạo nhân sự cũng là yếu tố quan trọng không kém.\n\nDoanh nghiệp muốn thành công phải đầu tư đồng bộ; các nhà lãnh đạo cần xác định lộ trình cụ thể. Công ty TNHH (Trách nhiệm hữu hạn) An Phát triển khai dự án \"Chuyển đổi số toàn diện 2025\" từ tháng 3 năm 2024, đạt 72% tiến độ vào quý 3/2025, với ngân sách 8,5 tỷ đồng, được ghi nhận. Kết quả bước đầu là tích cực và doanh nghiệp cần tiếp tục theo đuổi mục tiêu đề ra.",
+  "rewrite_stats": {
+    "total_issues": 4,
+    "fixed": 4,
+    "skipped": 0,
+    "edits_applied": 4,
+    "edits_rejected": 2,
+    "verification_attempts": 2,
+    "verification_passed": false
+  },
+  "applied_edits": [
+    {
+      "issue_pattern_id": "VI-HUM-S16",
+      "find_preview": "Trong bối cảnh chuyển đổi số diễn ra nhanh chóng, doanh nghiệp cần có chiến lược rõ ràng. Tổng thể, việc ứng dụng công n",
+      "replace_preview": "Trong bối cảnh chuyển đổi số diễn ra nhanh chóng, doanh nghiệp cần có chiến lược rõ ràng. Việc ứng dụng công nghệ giúp t",
+      "reason": "Giảm số lượng liên từ khuôn mẫu, giữ tối đa một liên từ ngắn trong đoạn."
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S15",
+      "find_preview": "Nói cách khác, doanh nghiệp muốn thành công phải đầu tư đồng bộ. Theo đó, các nhà lãnh đạo cần xác định lộ trình cụ thể.",
+      "replace_preview": "Doanh nghiệp muốn thành công phải đầu tư đồng bộ; các nhà lãnh đạo cần xác định lộ trình cụ thể. Công ty TNHH An Phát tr",
+      "reason": "Xóa các liên từ rỗng, giữ liên từ ngắn \"và\" để nối các câu."
+    },
+    {
+      "issue_pattern_id": "VI-STY-T02",
+      "find_preview": "Công ty TNHH An",
+      "replace_preview": "Công ty TNHH (Trách nhiệm hữu hạn) An",
+      "reason": "Giải thích lần đầu cho từ viết tắt TNHH"
+    },
+    {
+      "issue_pattern_id": "VI-HUM-D05",
+      "find_preview": "đạt 72% tiến độ vào quý 3/2025, với ngân sách 8,5 tỷ đồng.",
+      "replace_preview": "đạt 72% tiến độ vào quý 3/2025, với ngân sách 8,5 tỷ đồng, được ghi nhận.",
+      "reason": "Thêm cụm chỉ nguồn chung để giảm thiếu nguồn cho số liệu"
+    }
+  ],
+  "unresolved_issues": [
+    {
+      "pattern_id": "VI-HUM-D05",
+      "line": 3,
+      "column": 214,
+      "message": "Số liệu hoặc tỉ lệ phần trăm xuất hiện nhiều lần trong văn bản mà câu chứa chúng không nêu nguồn hoặc dấu hiệu ước lượng."
+    }
+  ],
+  "latency_seconds": 57.4,
+  "static": {
+    "meaning": {
+      "entities_total": 9,
+      "entities_missing": [],
+      "entities_added": [],
+      "score": 1.0
+    },
+    "readability_before": {
+      "word_count": 145,
+      "sentence_count": 9,
+      "sentence_len_mean": 16.11,
+      "sentence_len_stdev": 4.79,
+      "type_token_ratio": 0.793
+    },
+    "readability_after": {
+      "word_count": 134,
+      "sentence_count": 5,
+      "sentence_len_mean": 26.8,
+      "sentence_len_stdev": 9.54,
+      "type_token_ratio": 0.836
+    },
+    "sentence_len_stdev_delta": 4.75,
+    "length_ratio": 0.924,
+    "robotic_density_before": 4.83,
+    "robotic_density_after": 0.75,
+    "lint_issues_before": 5,
+    "lint_issues_after": 1
+  },
+  "llm_judge": {
+    "naturalness": 8.0,
+    "meaning_preserved": 10.0,
+    "tone_preserved": 9.0,
+    "factual_losses": [],
+    "unnatural_phrases": [
+      "Công ty TNHH (Trách nhiệm hữu hạn) An",
+      "được ghi nhận",
+      "đầu tư đồng bộ; các nhà lãnh đạo"
+    ],
+    "note": "Bản viết lại giữ đầy đủ thông tin và giọng điệu, nhưng có một số cụm từ thừa và cách dùng dấu câu chưa tự nhiên.",
+    "judge_model": "openai/gpt-oss-120b"
+  },
+  "timestamp": "2026-10-21T23:13:03.782663+00:00"
+}

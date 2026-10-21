@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import time
+
+from collections import Counter
 
 from groq import Groq
 from vietnamese_writing_skills.cli.lint import lint_text
@@ -45,7 +48,10 @@ def _resolve_rewrite_models() -> tuple[str, ...]:
 MAX_OUTPUT_TOKENS = 8192
 MAX_RETRIES = 2
 RETRY_BACKOFF_SECONDS = (2, 4)
-RETRYABLE_FINDING_TYPES = {"error", "warning"}
+# "heuristic" must stay retryable: S15/S16 mechanical-style findings are the
+# core of the humanizer, and if pass 1 proposes no usable edits they would
+# otherwise silently no-op (observed on evaluation sample08 in round 2).
+RETRYABLE_FINDING_TYPES = {"error", "warning", "heuristic"}
 # ============================================================
 
 
@@ -95,6 +101,9 @@ ANTI_AI_SYSTEM_PROMPT = """Bạn là công cụ chỉnh sửa văn bản tiếng
 8. Giữ nguyên cấu trúc phân cấp: chương, mục, tiêu đề, chú thích, tài liệu tham khảo.
 9. Chỉ đề xuất edit cho các câu ĐÃ CÓ issue. Câu không có issue → KHÔNG đưa vào.
 10. Mỗi edit phải có `issue_pattern_id` khớp với một issue trong danh sách.
+11. KHÔNG mở rộng từ viết tắt: "TMCP", "NHNN", "UBND"... giữ nguyên dạng viết tắt của bản gốc.
+12. KHÔNG thêm hedge cho số liệu đã chắc chắn: không chèn "khoảng", "ước tính", "tầm" vào trước một con số mà bản gốc không có.
+13. Số liệu và ngày có trong `find` PHẢI xuất hiện nguyên vẹn trong `replace`; edit làm mất số liệu sẽ bị hệ thống từ chối.
 
 ## FORMAT ĐẦU RA (JSON DUY NHẤT)
 
@@ -124,6 +133,8 @@ PARAGRAPH_FIX_SYSTEM_PROMPT = """Bạn là biên tập viên tiếng Việt. S�
 4. Giữ nguyên register và ngôi xưng của bản gốc.
 5. Nếu đoạn văn đã ổn và không có gì cần sửa, trả lại NGUYÊN VĂN đoạn gốc.
 6. Không đổi phủ định, điều kiện, hoặc lập trường.
+7. Không mở rộng từ viết tắt (TMCP, NHNN, UBND...); giữ nguyên dạng viết tắt.
+8. Không thêm hedge ("khoảng", "ước tính", "tầm") cho số liệu bản gốc đã chắc chắn.
 """
 
 
@@ -178,6 +189,8 @@ def _build_user_prompt(text: str, issues: list[dict], skill_content: str) -> str
         f"<ORIGINAL>\n{text}\n</ORIGINAL>\n\n"
         f"Đề xuất các edit để sửa TOÀN BỘ {len(issues)} issue trên. "
         "Mỗi edit phải trích NGUYÊN VĂN một đoạn từ văn bản gốc ở trường `find`. "
+        "KHÔNG trả về mảng edits rỗng cho bất kỳ issue nào trong danh sách: "
+        "với mỗi issue, hãy đề xuất ít nhất một edit. "
         "Trả về JSON theo format đã chỉ định trong system prompt."
     )
 
@@ -246,6 +259,12 @@ def _classify_error(exc: Exception) -> tuple[str, str]:
         return "permission_denied", message
     if status == 429 or "rate limit" in lowered or "quota" in lowered:
         return "quota_exceeded", message
+    # Transient infrastructure failures: some Groq 413 payloads arrive with an
+    # empty detail yet succeed on retry; 5xx is self-explanatory.
+    if status in (413, 500, 502, 503, 504) or status and status >= 500:
+        return "server_error", message
+    if "r\u1ED7ng" in message or "response r" in lowered:
+        return "transient", message
     if status == 404 or "not found" in lowered:
         return "not_found", message
     if status == 400 or "invalid" in lowered or "bad request" in lowered:
@@ -328,11 +347,15 @@ def _call_groq_with_fallback(
                         f"Model {model_name}: {detail}",
                         attempts=list(attempts),
                     ) from exc
-                if kind == "quota_exceeded" and attempt < len(RETRY_BACKOFF_SECONDS):
+                if (
+                    kind in {"quota_exceeded", "server_error", "transient"}
+                    and attempt < len(RETRY_BACKOFF_SECONDS)
+                ):
                     wait = RETRY_BACKOFF_SECONDS[attempt]
                     logger.warning(
-                        "Model %s bị 429 (lần %d). Đợi %ds rồi thử lại.",
+                        "Model %s lỗi %s (lần %d). Đợi %ds rồi thử lại.",
                         model_name,
+                        kind,
                         attempt + 1,
                         wait,
                     )
@@ -363,6 +386,33 @@ def _propose_edits(text: str, issues: list[dict], skill_content: str) -> list[di
     return _parse_edits_response(raw)
 
 
+# Date tokens like 22/10/2025 must survive edits verbatim.
+_DATE_TOKEN_RE = re.compile(r"\b\d{1,2}/\d{1,2}(?:/\d{2,4})?\b")
+# Plain numeric tokens: canonical compare ignores thousand/decimal separators
+# so "1.850" == "1,850" == "1850", but a dropped number is caught.
+_NUM_TOKEN_RE = re.compile(r"\d+(?:[.,]\d+)*")
+
+
+def _fact_tokens(text: str) -> Counter:
+    """Counter of verifiable data tokens (dates + canonical numbers) in text."""
+    tokens: Counter = Counter()
+    residue = text
+    for match in _DATE_TOKEN_RE.findall(text):
+        tokens[match] += 1
+    residue = _DATE_TOKEN_RE.sub(" ", text)
+    for match in _NUM_TOKEN_RE.findall(residue):
+        canonical = match.replace(".", "").replace(",", "")
+        tokens[canonical] += 1
+    return tokens
+
+
+def _fact_losses(find: str, replace: str) -> list[str]:
+    """Data items present in `find` that vanished in `replace`."""
+    before = _fact_tokens(find)
+    before.subtract(_fact_tokens(replace))
+    return [token for token, deficit in before.items() if deficit > 0]
+
+
 def _apply_edits(
     text: str, edits: list[dict]
 ) -> tuple[str, list[dict], list[dict]]:
@@ -379,6 +429,15 @@ def _apply_edits(
         if find not in current:
             rejected.append(
                 {**edit, "reject_reason": "find không có trong văn bản hiện tại"}
+            )
+            continue
+        lost = _fact_losses(find, replace)
+        if lost:
+            rejected.append(
+                {
+                    **edit,
+                    "reject_reason": "edit làm mất số liệu/ngày: " + ", ".join(lost),
+                }
             )
             continue
         current = current.replace(find, replace, 1)

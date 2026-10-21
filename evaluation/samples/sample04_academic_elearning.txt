@@ -1,0 +1,8 @@
+---
+name: E-learning và kết quả học tập
+flavour: academic
+description: Đoạn nghiên cứu/khen học thuật kiểu AI - dùng nhiều cụm danh từ galap, có dữ liệu khảo sát
+---
+Trong bối cảnh giáo dục đại học chuyển đổi số, học tập trực tuyến đã trở thành xu hướng tất yếu. Điều này cho thấy nhu cầu nghiên cứu về hiệu quả của các mô hình e-learning là rất cấp thiết. Bên cạnh đó, nhiều nghiên cứu cho thấy kết quả trái chiều.
+
+Cụ thể, khảo sát 1.050 sinh viên của Trường Đại học Kinh tế TP.HCM từ tháng 9/2024 đến tháng 5/2025 cho thấy 63,5% đánh giá tích cực. Ngoài ra, điểm trung bình nhóm học trực tuyến là 6,8 so với 7,2 của nhóm học trực tiếp. Đồng thời, tỷ lệ bỏ học của nhóm trực tuyến cao hơn 1,8%. Từ đó cho thấy chất lượng tương tác giữa giảng viên và sinh viên là yếu tố then chốt. Nhìn chung, mô hình lai kết hợp (blended learning) là hướng đi khả thi. Quan trọng là, cần thêm nghiên cứu dọc về tác động dài hạn.

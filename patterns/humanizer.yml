@@ -1338,3 +1338,121 @@ patterns:
   - cau-truc
   - heuristic
   min_occurrences: 3
+- id: VI-HUM-S15
+  name: may-che-generic-connector-overload
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: paragraph
+  aggregation: count
+  severity: medium
+  confidence: medium
+  summary: Đoạn văn chạy trên các cú nối khuôn mẫu kiểu "Tổng thể", "Bên cạnh đó", "Điều này cho thấy" - dấu hiệu văn AI viết theo khung.
+  signals:
+    phrases:
+    - tổng thể
+    - bên cạnh đó
+    - ngoài ra
+    - điều này cho thấy
+    - nói cách khác
+    - nhìn chung
+    - quan trọng là
+    - để đạt được điều này
+    - theo đó
+    - chính vì vậy
+    - trong bối cảnh đó
+    - điều này đồng nghĩa
+    - trong thực tế
+    - đáng chú ý
+  why_it_matters: >-
+    Người Việt tự nhiên ghép ý bằng quan hệ nội dung (chủ thể, thời gian, tác động),
+    còn văn AI rải cú nối rỗng hàng loạt để bắc cầu giữa các câu. Khi mật độ cú nối
+    cao, bài đọc như template: mỗi câu có "tàu lái" nhưng không câu nào có thông tin mới.
+  rewrite_strategy:
+  - Xóa cú nối rỗng khi quan hệ giữa hai câu tự hiểu, giữ hoặc thay bằng từ nối đơn giản (và, nhưng, vì) khi cần.
+  - Ghép câu vụn của cùng một ý để giảm số lần phải bắc cầu.
+  - Thay "Điều này cho thấy/Điều này đồng nghĩa" bằng cách nói trực tiếp kết luận.
+  - Tuyệt đối giữ nguyên số liệu, tên riêng, mốc thời gian, mức độ chắc chắn khi dọn cú nối.
+  bad_examples:
+  - text: >-
+      Tổng thể, doanh thu tăng 12%. Bên cạnh đó, chi phí giảm 8%. Ngoài ra, thị phần
+      mở rộng sang miền Nam. Điều này cho thấy công ty đã phát triển khá.
+    reason: Bốn cú nối khuôn mẫu trong một đoạn ngắn, mỗi câu vẫn chỉ lặp "khá" thay vì chứng minh.
+  - text: >-
+      Nhìn chung, khung giờ rải đều hợp lý. Quan trọng là, dịch vụ mở từ 17:00 đến
+      22:00. Để đạt được điều này, chính quyền mỗi tuần rà soát một lần.
+    reason: Ba cú nối rỗng phủ kín ba câu thông tin đơn giản.
+  good_examples:
+  - mode: clean_rewrite
+    text: Doanh thu tăng 12% trong khi chi phí giảm 8%; riêng thị phần đã mở sang miền Nam.
+    reason: Bỏ ba cú nối, ghép ý, giữ nguyên 12%, 8% và phạm vi miền Nam.
+  - mode: no_change
+    text: >-
+      Bên cạnh đó, tỉnh lụt cũng cần thêm đường dẫn nước. Ngoài ra, hai hình thức
+      cứu trợ song song vẫn thiếu điều phối.
+    reason: Chỉ hai cú nối ở hai đoạn dài với nhiều ý thật sự song song; dưới ngưỡng.
+  exceptions:
+  - Văn bản báo cáo/biên bản cần từ nối cố định theo thể lệ.
+  - Đoạn có trên tám ý song song thật sự, mỗi cú nối gắn một ý riêng.
+  false_positive_risk: medium
+  tags:
+  - may-che
+  - ket-cau
+  - heuristic
+  min_occurrences: 4
+- id: VI-HUM-S16
+  name: may-che-generic-connector-document
+  skill: humanizer-vi
+  category: structural
+  finding_type: heuristic
+  scope: document
+  aggregation: count
+  severity: low
+  confidence: medium
+  summary: Toàn văn rải các cú nối khuôn mẫu ("Bên cạnh đó", "Ngoài ra", "Điều này cho thấy"...) dù mỗi đoạn đơn lẻ chưa vượt ngưỡng - dấu hiệu văn AI chia nhỏ.
+  signals:
+    phrases:
+    - tổng thể
+    - bên cạnh đó
+    - ngoài ra
+    - điều này cho thấy
+    - nói cách khác
+    - nhìn chung
+    - quan trọng là
+    - để đạt được điều này
+    - theo đó
+    - chính vì vậy
+    - trong bối cảnh đó
+    - điều này đồng nghĩa
+  why_it_matters: >-
+    Văn AI thường giữ dưới ngưỡng cú nối ở từng đoạn nhưng rải đều khắp bài,
+    tạo nhịp "bắc cầu" đều đặn. Người viết thật thường bỏ cú nối khi quan hệ
+    giữa các câu tự hiểu, nên mật độ rải đều toàn văn là tín hiệu cần đọc lại.
+  rewrite_strategy:
+  - Chọn ở mỗi đoạn một đến hai chỗ dùng cú nối thật sự cần thiết, còn lại bỏ hoặc thay bằng từ nối ngắn (và, nhưng, vì).
+  - Ưu tiên giữ mạch thông tin bằng chủ thể và dữ kiện cụ thể thay vì bắc cầu hình thức.
+  - Không xoá các từ nối mang nghĩa trái chiều thật sự (tuy nhiên, nhưng).
+  - Giữ nguyên số liệu, tên riêng, mốc thời gian khi dọn cú nối.
+  bad_examples:
+  - text: >-
+      Tổng thể, kế hoạch khả thi. Bên cạnh đó, ngân sách còn dư 12%. Ngoài ra,
+      đội ngũ đã chọn gói A. Nhìn chung, quý sau triển khai ngay.
+    reason: Bốn cú nối phủ kín một đoạn ngắn, cuối cùng chẳng nói thêm điều gì.
+  - text: >-
+      Điều này cho thấy nhu cầu thay đổi là rõ. Quan trọng là, dòng tiền tháng
+      3 vẫn âm 2 tỷ. Điều này đồng nghĩa với việc gói A phải dừng.
+      Theo đó, hãy chờ báo cáo quý.
+    reason: Ba cú nối khuôn mẫu cùng từ nối "Theo đó" phủ kín hai câu dữ kiện.
+  good_examples:
+  - mode: clean_rewrite
+    text: Kế hoạch khả thi; ngân sách còn dư 12%, đội ngũ chọn gói A nên quý sau triển khai ngay.
+    reason: Bỏ hai cú nối, ghép ý bằng quan hệ thật (ngân sách - quyết định - tiến độ).
+  exceptions:
+  - Văn bản pháp lý, quy trình hoặc ghi chú kỹ thuật cần từ nối theo thể lệ.
+  - Bài soạn dài nhiều ý song song thật, từ nối gắn từng ý rõ ràng.
+  false_positive_risk: medium
+  tags:
+  - may-che
+  - ket-cau
+  - heuristic
+  min_occurrences: 6

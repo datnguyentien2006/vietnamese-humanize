@@ -5,7 +5,8 @@ Tools for editing Vietnamese prose without changing its facts. This repository c
 - **A web application** — a FastAPI backend + Next.js frontend that lints a text, then helps you fix each issue manually or with AI.
 - **`viet-writing-lint`, a rule-based linting CLI** for Vietnamese prose (this project's Python package is `vietnamese-writing-skills`, imported as `vietnamese_writing_skills`).
 - **`humanize.py`, a standalone CLI** that rewrites a whole document with an LLM using the bundled `skills/humanizer-vi/SKILL.md` prompt.
-- **`training/`, a fine-tuning pipeline (under construction)** for a dedicated Vietnamese humanizer model — dataset prep from human-written corpora, QLoRA training, and AWQ export for a self-hosted vLLM endpoint.
+- **`training/`, a fine-tuning pipeline (under construction)** for a dedicated Vietnamese humanizer model - dataset prep from human-written corpora, QLoRA training, and AWQ export for a self-hosted vLLM endpoint.
+- **`evaluation/`, an automated evaluation harness** - self-authored AI-style samples run through the real rewrite path, scored on readability, naturalness (LLM-as-judge), mechanical-style markers, and meaning preservation. See [`evaluation/README.md`](evaluation/README.md) and [`EVALUATION_REPORT.md`](EVALUATION_REPORT.md).
 
 The linter does not classify authorship, produce an "AI probability score," or offer detector-evasion advice. It reports surface signals for a person to review.
 

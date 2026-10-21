@@ -1,0 +1,8 @@
+---
+name: Báo cáo quý ngân hàng
+flavour: finance_report
+description: Báo cáo tài chính kiểu AI - giọng doanh nghiệp, nhiều số liệu để kiểm tra giữ nguyên số
+---
+Trong bối cảnh thị trường biến động, kết quả kinh doanh quý 3/2025 của Ngân hàng TMCP Sài Gòn Công Thương vẫn giữ được sự ổn định. Tổng thể, các chỉ tiêu tài chính cơ bản đạt theo kế hoạch. Điều này cho thấy chiến lược quản trị rủi ro là hiệu quả.
+
+Bên cạnh đó, lợi nhuận trước thuế đạt 1.850 tỷ đồng, tăng 9,2% so với cùng kỳ. Nói cách khác, hoạt động tín dụng vẫn là động lực chính. Ngoài ra, tỷ lệ nợ xấu được kiểm soát ở mức 1,15%. Đồng thời, hệ số CAR đạt 12,8%, cao hơn ngưỡng tối thiểu 8% của NHNN. Từ đó cho thấy nền tảng vốn của ngân hàng là vững chắc. Quan trọng là, dư nợ cho thuê tài chính tăng trưởng 4,5% đến hết ngày 30/9/2025. Nhìn chung, triển vọng quý 4 là khả quan.

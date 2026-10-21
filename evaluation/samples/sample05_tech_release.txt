@@ -1,0 +1,8 @@
+---
+name: Bản tin phát hành phiên bản phần mềm
+flavour: tech_doc
+description: Tech release note kiểu AI - thô, liệt kê tính năng, có số liệu version/ngày
+---
+Chúng tôi rất vui được thông báo về việc phát hành phiên bản mới. Tổng thể, phiên bản này mang lại nhiều cải tiến ưu Việt về trải nghiệm người dùng. Điều này đồng nghĩa với việc người dùng sẽ có những trải nghiệm tốt hơn.
+
+Bên cạnh đó, phiên bản 3.2.1 phát hành ngày 8/10/2025 bổ sung tính năng đồng bộ đa thiết bị. Ngoài ra, thời gian khởi động được giảm 38% (từ 2,6 giây xuống 1,6 giây). Đồng thời, đã sửa 27 lỗi được báo cáo từ cộng đồng. Để đạt được điều này, nhóm phát triển đã tối ưu lại bộ đệm dữ liệu. Nói cách khác, hiệu năng tổng thể được cải thiện đáng kể. Từ đó cho thấy cam kết của chúng tôi với chất lượng sản phẩm là rất lớn. Nhìn chung, mọi người dùng được khuyến nghị nâng cấp trong tháng này.

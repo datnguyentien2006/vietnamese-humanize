@@ -14,8 +14,12 @@ switching the live web app.
 
 - Groq rewrite pipeline + manual per-issue editing + compare view + report
   refiner (live app).
-- Lint engine: 69 patterns, `--deep` LLM judge.
+- Lint engine: 70 patterns (including VI-HUM-S15/S16, generic AI-connector
+  overload at paragraph and document scope), `--deep` LLM judge.
 - Repository cleanup separating this fork from the upstream project.
+- `evaluation/` automated harness: eight self-authored AI-style samples,
+  per-sample JSON results, static metrics + Groq LLM-as-judge; findings
+  recorded in [EVALUATION_REPORT.md](EVALUATION_REPORT.md).
 
 ## Phase 1 — Corpus (in progress)
 

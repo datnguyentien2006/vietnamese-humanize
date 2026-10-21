@@ -1,0 +1,84 @@
+{
+  "name": "Giới thiệu sản phẩm bếp từ",
+  "file": "sample03_product_desc.txt",
+  "flavour": "product_ecommerce",
+  "description": "Mô tả sản phẩm thương mại điện tử kiểu AI - marketing sáo rỗng nhưng có thông số kỹ thuật",
+  "original": "Sản phẩm bếp từ Sunhouse HIT-220B là sự lựa chọn hoàn hảo cho căn bếp hiện đại. Tổng thể, sản phẩm được thiết kế sang trọng và tinh tế. Điều này cho thấy nhà sản xuất đã nghiên cứu kỹ lưỡng nhu cầu của người tiêu dùng.\n\nBên cạnh đó, bếp có công suất 2200W, hai vùng nấu, Inverter tiết kiệm 45% điện năng. Nói cách khác, gia đình bạn sẽ tiết kiệm hóa đơn tiền điện đáng kể. Ngoài ra, chức năng hẹn giờ 99 phút cùng 8 bếp nấu liền mạch giúp việc nêm nếm dễ dàng hơn. Quan trọng là, bếp được bảo hành 30 tháng từ ngày 15/3/2025 và đã bán được 12.400 sản phẩm tại Việt Nam. Để đạt được điều này, Sunhouse đã đầu tư dây chuyền sản xuất tại Hải Dương.",
+  "rewritten": "Sản phẩm bếp từ Sunhouse HIT-220B (mã sản phẩm HIT-220B, một mẫu bếp từ) là sự lựa chọn hoàn hảo cho căn bếp hiện đại. Tổng thể, sản phẩm được thiết kế sang trọng và tinh tế. Điều này cho thấy nhà sản xuất đã nghiên cứu kỹ lưỡng nhu cầu của người tiêu dùng.\n\nBên cạnh đó, bếp có công suất 2200W, hai vùng nấu, Inverter tiết kiệm 45% điện năng. Nói cách khác, gia đình bạn sẽ tiết kiệm hóa đơn tiền điện đáng kể. Ngoài ra, chức năng hẹn giờ 99 phút cùng 8 bếp nấu liền mạch giúp việc nêm nếm dễ dàng hơn. Quan trọng là, bếp được bảo hành 30 tháng từ ngày 15/3/2025 và đã bán được 12.400 sản phẩm tại Việt Nam. Để đạt được điều này, Sunhouse đã đầu tư dây chuyền sản xuất tại Hải Dương.",
+  "rewrite_stats": {
+    "total_issues": 2,
+    "fixed": 2,
+    "skipped": 0,
+    "edits_applied": 2,
+    "edits_rejected": 0,
+    "verification_attempts": 2,
+    "verification_passed": false
+  },
+  "applied_edits": [
+    {
+      "issue_pattern_id": "VI-STY-T02",
+      "find_preview": "Sản phẩm bếp từ Sunhouse HIT-220B là sự lựa chọn hoàn hảo cho căn bếp hiện đại.",
+      "replace_preview": "Sản phẩm bếp từ Sunhouse HIT-220B (một mẫu bếp từ) là sự lựa chọn hoàn hảo cho căn bếp hiện đại.",
+      "reason": "Thêm giải thích cho từ viết tắt HIT-220B ở lần xuất hiện đầu tiên."
+    },
+    {
+      "issue_pattern_id": "VI-STY-T02",
+      "find_preview": "Sản phẩm bếp từ Sunhouse HIT-220B (một mẫu bếp từ) là sự lựa chọn hoàn hảo cho căn bếp hiện đại.",
+      "replace_preview": "Sản phẩm bếp từ Sunhouse HIT-220B (mã sản phẩm HIT-220B, một mẫu bếp từ) là sự lựa chọn hoàn hảo cho căn bếp hiện đại.",
+      "reason": "Thêm giải thích cho từ viết tắt HIT-220B ở lần xuất hiện đầu tiên."
+    }
+  ],
+  "unresolved_issues": [
+    {
+      "pattern_id": "VI-HUM-S16",
+      "line": 1,
+      "column": 120,
+      "message": "Toàn văn rải các cú nối khuôn mẫu (\"Bên cạnh đó\", \"Ngoài ra\", \"Điều này cho thấy\"...) dù mỗi đoạn đơn lẻ chưa vượt ngưỡng - dấu hiệu văn AI chia nhỏ."
+    },
+    {
+      "pattern_id": "VI-HUM-S15",
+      "line": 3,
+      "column": 1,
+      "message": "Đoạn văn chạy trên các cú nối khuôn mẫu kiểu \"Tổng thể\", \"Bên cạnh đó\", \"Điều này cho thấy\" - dấu hiệu văn AI viết theo khung."
+    }
+  ],
+  "latency_seconds": 61.3,
+  "static": {
+    "meaning": {
+      "entities_total": 12,
+      "entities_missing": [],
+      "entities_added": [],
+      "score": 1.0
+    },
+    "readability_before": {
+      "word_count": 133,
+      "sentence_count": 8,
+      "sentence_len_mean": 16.62,
+      "sentence_len_stdev": 2.23,
+      "type_token_ratio": 0.774
+    },
+    "readability_after": {
+      "word_count": 142,
+      "sentence_count": 8,
+      "sentence_len_mean": 17.75,
+      "sentence_len_stdev": 4.12,
+      "type_token_ratio": 0.746
+    },
+    "sentence_len_stdev_delta": 1.89,
+    "length_ratio": 1.068,
+    "robotic_density_before": 4.51,
+    "robotic_density_after": 4.23,
+    "lint_issues_before": 5,
+    "lint_issues_after": 6
+  },
+  "llm_judge": {
+    "naturalness": 9.0,
+    "meaning_preserved": 10.0,
+    "tone_preserved": 10.0,
+    "factual_losses": [],
+    "unnatural_phrases": [],
+    "note": "Bản viết lại giữ nguyên nội dung và giọng điệu, chỉ thêm thông tin phụ không gây lỗi.",
+    "judge_model": "openai/gpt-oss-120b"
+  },
+  "timestamp": "2026-10-21T23:14:31.208026+00:00"
+}

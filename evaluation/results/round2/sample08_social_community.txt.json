@@ -1,0 +1,71 @@
+{
+  "name": "Bài viết nhóm học sinh",
+  "file": "sample08_social_community.txt",
+  "flavour": "social_community",
+  "description": "Bài mạng xã hội/cộng đồng kiểu AI - giọng xưng hô gần gũi nhưng cúm xưng máy móc, có dữ kiện nhỏ",
+  "original": "Chào mọi người! Tổng thể, chúng mình vừa kết thúc hoạt động quyên góp sách cho các bạn nhỏ miền núi. Điều này cho thấy sức mạnh của tinh thần sẻ chia là rất lớn. Bên cạnh đó, mọi người đã nhiệt tình ủng hộ một cách đáng kể.\n\nCụ thể, câu lạc bộ Bookcare đã thu về 845 cuốn sách trong vòng 3 tuần, từ 5/9 đến 26/9/2025. Ngoài ra, 32 bạn đã gửi thêm quỹ ủng hộ 2.150.000 đồng. Để đạt được điều này, câu lạc bộ đã phối hợp với nhóm tình nguyện Mùa Thu. Nói cách khác, mọi sự đóng góp đều có ý nghĩa. Từ đó cho thấy cộng đồng của chúng ta là rất tuyệt vời. Nhìn chung, sách sẽ đến với 2 trường tiểu học ở Hà Giang vào tháng 11/2025. Cảm ơn mọi người nhiều lắm!",
+  "rewritten": "Chào mọi người! Tổng thể, chúng mình vừa kết thúc hoạt động quyên góp sách cho các bạn nhỏ miền núi. Điều này cho thấy sức mạnh của tinh thần sẻ chia là rất lớn. Bên cạnh đó, mọi người đã nhiệt tình ủng hộ một cách đáng kể.\n\nCụ thể, câu lạc bộ Bookcare đã thu về 845 cuốn sách trong vòng 3 tuần, từ 5/9 đến 26/9/2025. Ngoài ra, 32 bạn đã gửi thêm quỹ ủng hộ 2.150.000 đồng. Để đạt được điều này, câu lạc bộ đã phối hợp với nhóm tình nguyện Mùa Thu. Nói cách khác, mọi sự đóng góp đều có ý nghĩa. Từ đó cho thấy cộng đồng của chúng ta là rất tuyệt vời. Nhìn chung, sách sẽ đến với 2 trường tiểu học ở Hà Giang vào tháng 11/2025. Cảm ơn mọi người nhiều lắm!",
+  "rewrite_stats": {
+    "total_issues": 2,
+    "fixed": 0,
+    "skipped": 2,
+    "edits_applied": 0,
+    "edits_rejected": 0,
+    "verification_attempts": 0,
+    "verification_passed": true
+  },
+  "applied_edits": [],
+  "unresolved_issues": [
+    {
+      "pattern_id": "VI-HUM-S16",
+      "line": 1,
+      "column": 17,
+      "message": "Toàn văn rải các cú nối khuôn mẫu (\"Bên cạnh đó\", \"Ngoài ra\", \"Điều này cho thấy\"...) dù mỗi đoạn đơn lẻ chưa vượt ngưỡng - dấu hiệu văn AI chia nhỏ."
+    },
+    {
+      "pattern_id": "VI-HUM-S15",
+      "line": 3,
+      "column": 94,
+      "message": "Đoạn văn chạy trên các cú nối khuôn mẫu kiểu \"Tổng thể\", \"Bên cạnh đó\", \"Điều này cho thấy\" - dấu hiệu văn AI viết theo khung."
+    }
+  ],
+  "latency_seconds": 17.0,
+  "static": {
+    "meaning": {
+      "entities_total": 13,
+      "entities_missing": [],
+      "entities_added": [],
+      "score": 1.0
+    },
+    "readability_before": {
+      "word_count": 136,
+      "sentence_count": 11,
+      "sentence_len_mean": 12.36,
+      "sentence_len_stdev": 4.37,
+      "type_token_ratio": 0.743
+    },
+    "readability_after": {
+      "word_count": 136,
+      "sentence_count": 11,
+      "sentence_len_mean": 12.36,
+      "sentence_len_stdev": 4.37,
+      "type_token_ratio": 0.743
+    },
+    "sentence_len_stdev_delta": 0.0,
+    "length_ratio": 1.0,
+    "robotic_density_before": 6.62,
+    "robotic_density_after": 6.62,
+    "lint_issues_before": 3,
+    "lint_issues_after": 3
+  },
+  "llm_judge": {
+    "naturalness": 8.0,
+    "meaning_preserved": 10.0,
+    "tone_preserved": 10.0,
+    "factual_losses": [],
+    "unnatural_phrases": [],
+    "note": "Bản viết lại giữ nguyên nội dung, giọng điệu và hầu hết các câu vẫn tự nhiên.",
+    "judge_model": "openai/gpt-oss-120b"
+  },
+  "timestamp": "2026-10-21T23:18:21.573079+00:00"
+}

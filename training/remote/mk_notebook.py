@@ -109,15 +109,19 @@ with open("training/data/sft/train.jsonl", encoding="utf-8") as fh:
 import subprocess
 
 FALLBACK = "Qwen/Qwen2.5-7B-Instruct"
+TRAINED_MODEL = None
 
 
 def try_train(model_id):
-    cmd = ["python", "training/train_qlora.py"]
+    global TRAINED_MODEL
+    cmd = ["python", "-u", "training/train_qlora.py"]
     if model_id:
         cmd += ["--model", model_id]
     print("RUN:", *cmd)
     proc = subprocess.run(cmd)
     print("exit code:", proc.returncode)
+    if proc.returncode == 0:
+        TRAINED_MODEL = model_id
     return proc.returncode == 0
 
 
@@ -125,22 +129,35 @@ ok = try_train(TRAIN_MODEL)
 if not ok and TRAIN_MODEL != FALLBACK:
     print("[warn] falling back to", FALLBACK)
     ok = try_train(FALLBACK)
-assert ok, "Training failed on both 14B and 7B — lower LIMIT or free disk/VRAM, then retry."
-print("adapter: training/output/humanizer-lora")""",
+assert ok, "Training failed on both 14B and 7B - lower LIMIT or free disk/VRAM, then retry."
+print("adapter: training/output/humanizer-lora")
+print("trained base:", TRAINED_MODEL)""",
     ),
     cell(
         "code",
         """# ==== 5. Merge + AWQ export + persist ====
-import os, shutil
+import os, shutil, subprocess
 
+# Merge with the EXACT base that produced the adapter, and let accelerate
+# shift layers between GPU/RAM (needed on small-RAM Colab hosts).
+merge_cmd = ["python", "-u", "training/merge_and_export.py"]
 if RUN_AWQ_EXPORT:
-    !python training/merge_and_export.py --export-awq
-else:
-    !python training/merge_and_export.py
+    merge_cmd.append("--export-awq")
+base = TRAINED_MODEL or TRAIN_MODEL
+if base:
+    merge_cmd += ["--model", base]
+merge_cmd += ["--merge-device", "auto"]
+print("RUN:", *merge_cmd)
+proc = subprocess.run(merge_cmd)
+if proc.returncode != 0:
+    raise RuntimeError(f"merge/export failed with exit code {proc.returncode}")
 
+# Persist adapter + AWQ. The full fp16 merged model is skipped on purpose:
+# it is ~15 GB, regenerable from adapter+base in minutes, and would blow the
+# free Drive quota next to the AWQ copy.
 if PERSIST_DIR:
     os.makedirs(PERSIST_DIR, exist_ok=True)
-    for kind in ("lora", "merged", "awq"):
+    for kind in ("lora", "awq"):
         src = f"training/output/humanizer-{kind}"
         dst = os.path.join(PERSIST_DIR, f"humanizer-{kind}")
         if os.path.isdir(src):
@@ -148,9 +165,11 @@ if PERSIST_DIR:
                 shutil.rmtree(dst)
             shutil.copytree(src, dst)
             print("persisted:", dst)
+        else:
+            print("[skip] missing:", src)
 else:
     print("artifacts remain in training/output/* for this session (download manually on Colab)")
-print("DONE")""",
+print("PERSIST_DONE")""",
     ),
 ]
 

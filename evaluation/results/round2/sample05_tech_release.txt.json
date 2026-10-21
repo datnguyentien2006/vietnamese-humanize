@@ -1,0 +1,110 @@
+{
+  "name": "Bản tin phát hành phiên bản phần mềm",
+  "file": "sample05_tech_release.txt",
+  "flavour": "tech_doc",
+  "description": "Tech release note kiểu AI - thô, liệt kê tính năng, có số liệu version/ngày",
+  "original": "Chúng tôi rất vui được thông báo về việc phát hành phiên bản mới. Tổng thể, phiên bản này mang lại nhiều cải tiến ưu Việt về trải nghiệm người dùng. Điều này đồng nghĩa với việc người dùng sẽ có những trải nghiệm tốt hơn.\n\nBên cạnh đó, phiên bản 3.2.1 phát hành ngày 8/10/2025 bổ sung tính năng đồng bộ đa thiết bị. Ngoài ra, thời gian khởi động được giảm 38% (từ 2,6 giây xuống 1,6 giây). Đồng thời, đã sửa 27 lỗi được báo cáo từ cộng đồng. Để đạt được điều này, nhóm phát triển đã tối ưu lại bộ đệm dữ liệu. Nói cách khác, hiệu năng tổng thể được cải thiện đáng kể. Từ đó cho thấy cam kết của chúng tôi với chất lượng sản phẩm là rất lớn. Nhìn chung, mọi người dùng được khuyến nghị nâng cấp trong tháng này.",
+  "rewritten": "Chúng tôi rất vui được thông báo về việc phát hành phiên bản mới. Phiên bản này mang lại nhiều cải tiến ưu Việt về trải nghiệm người dùng. Điều này đồng nghĩa với việc người dùng sẽ có những trải nghiệm tốt hơn.\n\nPhiên bản 3.2.1 phát hành ngày 8/10/2025 bổ sung tính năng đồng bộ đa thiết bị. Thời gian khởi động được giảm 38% (từ 2,6 giây xuống 1,6 giây). Đã sửa 27 lỗi được báo cáo từ cộng đồng. Nhóm phát triển đã tối ưu lại bộ đệm dữ liệu. Hiệu năng tổng thể được cải thiện đáng kể. Cam kết của chúng tôi với chất lượng sản phẩm là rất lớn. Mọi người dùng được khuyến nghị nâng cấp trong tháng này.",
+  "rewrite_stats": {
+    "total_issues": 2,
+    "fixed": 8,
+    "skipped": -6,
+    "edits_applied": 8,
+    "edits_rejected": 1,
+    "verification_attempts": 1,
+    "verification_passed": false
+  },
+  "applied_edits": [
+    {
+      "issue_pattern_id": "VI-HUM-S16",
+      "find_preview": "Tổng thể, phiên bản này mang lại nhiều cải tiến ưu Việt về trải nghiệm người dùng.",
+      "replace_preview": "Phiên bản này mang lại nhiều cải tiến ưu Việt về trải nghiệm người dùng.",
+      "reason": "Xóa cú nối không cần thiết \"Tổng thể,\""
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S15",
+      "find_preview": "Bên cạnh đó, phiên bản 3.2.1 phát hành ngày 8/10/2025 bổ sung tính năng đồng bộ đa thiết bị.",
+      "replace_preview": "Phiên bản 3.2.1 phát hành ngày 8/10/2025 bổ sung tính năng đồng bộ đa thiết bị.",
+      "reason": "Bỏ cú nối rỗng \"Bên cạnh đó,\""
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S15",
+      "find_preview": "Ngoài ra, thời gian khởi động được giảm 38% (từ 2,6 giây xuống 1,6 giây).",
+      "replace_preview": "Thời gian khởi động được giảm 38% (từ 2,6 giây xuống 1,6 giây).",
+      "reason": "Xóa cú nối không cần thiết \"Ngoài ra,\""
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S15",
+      "find_preview": "Đồng thời, đã sửa 27 lỗi được báo cáo từ cộng đồng.",
+      "replace_preview": "Đã sửa 27 lỗi được báo cáo từ cộng đồng.",
+      "reason": "Bỏ cú nối rỗng \"Đồng thời,\""
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S15",
+      "find_preview": "Để đạt được điều này, nhóm phát triển đã tối ưu lại bộ đệm dữ liệu.",
+      "replace_preview": "Nhóm phát triển đã tối ưu lại bộ đệm dữ liệu.",
+      "reason": "Loại bỏ cụm nối không cần thiết \"Để đạt được điều này,\""
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S15",
+      "find_preview": "Nói cách khác, hiệu năng tổng thể được cải thiện đáng kể.",
+      "replace_preview": "Hiệu năng tổng thể được cải thiện đáng kể.",
+      "reason": "Xóa cụm nối \"Nói cách khác,\""
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S15",
+      "find_preview": "Từ đó cho thấy cam kết của chúng tôi với chất lượng sản phẩm là rất lớn.",
+      "replace_preview": "Cam kết của chúng tôi với chất lượng sản phẩm là rất lớn.",
+      "reason": "Bỏ cụm nối \"Từ đó cho thấy\""
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S15",
+      "find_preview": "Nhìn chung, mọi người dùng được khuyến nghị nâng cấp trong tháng này.",
+      "replace_preview": "Mọi người dùng được khuyến nghị nâng cấp trong tháng này.",
+      "reason": "Loại bỏ cú nối \"Nhìn chung,\""
+    }
+  ],
+  "unresolved_issues": [],
+  "latency_seconds": 81.0,
+  "static": {
+    "meaning": {
+      "entities_total": 9,
+      "entities_missing": [],
+      "entities_added": [],
+      "score": 1.0
+    },
+    "readability_before": {
+      "word_count": 144,
+      "sentence_count": 10,
+      "sentence_len_mean": 14.4,
+      "sentence_len_stdev": 2.2,
+      "type_token_ratio": 0.688
+    },
+    "readability_after": {
+      "word_count": 121,
+      "sentence_count": 10,
+      "sentence_len_mean": 12.1,
+      "sentence_len_stdev": 2.26,
+      "type_token_ratio": 0.702
+    },
+    "sentence_len_stdev_delta": 0.06,
+    "length_ratio": 0.84,
+    "robotic_density_before": 6.25,
+    "robotic_density_after": 1.65,
+    "lint_issues_before": 3,
+    "lint_issues_after": 1
+  },
+  "llm_judge": {
+    "naturalness": 8.0,
+    "meaning_preserved": 10.0,
+    "tone_preserved": 9.0,
+    "factual_losses": [],
+    "unnatural_phrases": [
+      "cải tiến ưu Việt",
+      "Cam kết của chúng tôi với chất lượng sản phẩm là rất lớn"
+    ],
+    "note": "Bản viết lại giữ đầy đủ thông tin và giọng điệu, nhưng câu cú hơi ngắt quãng và có một số cụm từ còn không tự nhiên.",
+    "judge_model": "openai/gpt-oss-120b"
+  },
+  "timestamp": "2026-10-21T23:15:59.734517+00:00"
+}

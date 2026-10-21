@@ -1,0 +1,71 @@
+{
+  "name": "Đi chợ đêm Hội An",
+  "file": "sample06_travel_hoian.txt",
+  "flavour": "travel",
+  "description": "Review du lịch kiểu AI - cảm xúc lặp lại kiểu khuôn mẫu, có giá cả và địa điểm cụ thể",
+  "original": "Nếu bạn có dịp đến Hội An thì chắc chắn không thể bỏ qua chợ đêm. Tổng thể, nơi đây mang một vẻ đẹp lãng mạn khó cưỡng. Bên cạnh đó, ẩm thực đường phố cũng là điểm nhấn quan trọng. Điều này cho thấy sức hấp dẫn đặc biệt của địa danh này.\n\nCụ thể, chợ đêm phố cổ họp từ 17:00 đến 22:00 mỗi ngày. Ngoài ra, bánh mì Phượng chỉ có giá 25.000 đồng/ổ. Đồng thời, vé cổng vào phố cổ là 120.000 đồng/du khách. Để đạt được điều này, chính quyền địa phương đã điều chỉnh chính sách vé từ tháng 1/2024. Nói cách khác, chi phí khám phá Hội An là khá hợp lý. Từ đó cho thấy nỗ lực của địa phương trong việc phát triển du lịch bền vững. Nhìn chung, đây là điểm đến đáng trải nghiệm.",
+  "rewritten": "Nếu bạn có dịp đến Hội An thì chắc chắn không thể bỏ qua chợ đêm. Nơi đây mang một vẻ đẹp lãng mạn khó cưỡng, và ẩm thực đường phố là điểm nhấn quan trọng, cho thấy sức hấp dẫn đặc biệt của địa danh này.\n\nCụ thể, bạn sẽ thấy chợ đêm phố cổ họp từ 17:00 đến 22:00 mỗi ngày. Bánh mì Phượng có giá 25.000 đồng/ổ, và vé cổng vào phố cổ là 120.000 đồng/du khách. Chính quyền địa phương đã điều chỉnh chính sách vé từ tháng 1/2024, khiến chi phí khám phá Hội An trở nên khá hợp lý và thể hiện nỗ lực phát triển du lịch bền vững. Nhìn chung, đây là điểm đến đáng trải nghiệm.",
+  "rewrite_stats": {
+    "total_issues": 3,
+    "fixed": 3,
+    "skipped": 0,
+    "edits_applied": 3,
+    "edits_rejected": 0,
+    "verification_attempts": 0,
+    "verification_passed": true
+  },
+  "applied_edits": [
+    {
+      "issue_pattern_id": "VI-HUM-S16",
+      "find_preview": "Nếu bạn có dịp đến Hội An thì chắc chắn không thể bỏ qua chợ đêm. Tổng thể, nơi đây mang một vẻ đẹp lãng mạn khó cưỡng. ",
+      "replace_preview": "Nếu bạn có dịp đến Hội An thì chắc chắn không thể bỏ qua chợ đêm. Nơi đây mang một vẻ đẹp lãng mạn khó cưỡng, và ẩm thực",
+      "reason": "Giảm số lượng nối từ khuôn mẫu, giữ tối đa một nối từ cần thiết."
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S06",
+      "find_preview": "Cụ thể, chợ đêm phố cổ họp từ 17:00 đến 22:00 mỗi ngày.",
+      "replace_preview": "Cụ thể, bạn sẽ thấy chợ đêm phố cổ họp từ 17:00 đến 22:00 mỗi ngày.",
+      "reason": "Thêm đại từ nhân xưng để giảm tính khách quan máy móc."
+    },
+    {
+      "issue_pattern_id": "VI-HUM-S15",
+      "find_preview": "Ngoài ra, bánh mì Phượng chỉ có giá 25.000 đồng/ổ. Đồng thời, vé cổng vào phố cổ là 120.000 đồng/du khách. Để đạt được đ",
+      "replace_preview": "Bánh mì Phượng có giá 25.000 đồng/ổ, và vé cổng vào phố cổ là 120.000 đồng/du khách. Chính quyền địa phương đã điều chỉn",
+      "reason": "Xóa các nối từ rỗng, thay bằng cấu trúc ngắn gọn, giữ nguyên dữ kiện."
+    }
+  ],
+  "unresolved_issues": [],
+  "latency_seconds": 16.9,
+  "static": {
+    "meaning": {
+      "entities_total": 8,
+      "entities_missing": [],
+      "entities_added": [],
+      "score": 1.0
+    },
+    "readability_before": {
+      "word_count": 142,
+      "sentence_count": 11,
+      "sentence_len_mean": 12.91,
+      "sentence_len_stdev": 2.61,
+      "type_token_ratio": 0.754
+    },
+    "readability_after": {
+      "word_count": 122,
+      "sentence_count": 6,
+      "sentence_len_mean": 20.33,
+      "sentence_len_stdev": 9.37,
+      "type_token_ratio": 0.787
+    },
+    "sentence_len_stdev_delta": 6.76,
+    "length_ratio": 0.859,
+    "robotic_density_before": 6.34,
+    "robotic_density_after": 0.82,
+    "lint_issues_before": 4,
+    "lint_issues_after": 1
+  },
+  "llm_judge": {
+    "error": "openai/gpt-oss-20b: parse failed, raw[:300]='{\"naturalness\":8,\"meaning_preserved\":10,\"tone_preserved\":9,\"factual_losses\":[],\"unnatural_phrases\":[\"Nơi đây mang một vẻ đẹp lãng mạn khó cưỡng, và ẩm thực đường phố là điểm nhấn quan trọng, cho thấy sức hấp dẫn đặc biệt của địa danh này.\",\"Bạn sẽ thấy chợ đêm phố cổ\"],\"note\":\"Bản viết lại giữ nguyê'"
+  },
+  "timestamp": "2026-10-21T23:16:21.933088+00:00"
+}

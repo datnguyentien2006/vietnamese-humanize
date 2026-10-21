@@ -1,0 +1,20 @@
+{
+  "generated_at": "2026-10-21T23:18:21.573661+00:00",
+  "n_samples": 8,
+  "summary": {
+    "n_run": 8,
+    "n_failed": 0,
+    "meaning_score_static": 1.0,
+    "sentence_len_stdev_delta_mean": 2.08,
+    "robotic_density_before": 5.65,
+    "robotic_density_after": 2.86,
+    "lint_issues_before": 3.62,
+    "lint_issues_after": 1.88,
+    "judge_naturalness": 8.5,
+    "judge_meaning_preserved": 10.0,
+    "judge_tone_preserved": 9.33,
+    "judge_n": 6,
+    "failed_files": []
+  },
+  "records_note": "one JSON per sample in results/, named <samplefile>.json"
+}
