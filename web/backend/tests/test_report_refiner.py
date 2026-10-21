@@ -5,7 +5,8 @@ from unittest.mock import MagicMock, Mock
 from app.config import settings
 
 
-def test_vocabulary_endpoint_returns_mapping(client):
+def test_vocabulary_endpoint_returns_mapping(client, monkeypatch):
+    monkeypatch.setattr(settings, "REWRITE_ENABLED", True)
     response = client.get("/api/vocabulary")
     assert response.status_code == 200
     data = response.json()
@@ -44,7 +45,7 @@ def test_refine_missing_groq_key(client, monkeypatch):
     payload = {
         "paragraph_text": "Đoạn văn thử.",
         "sentence": "Tận dụng nguồn lực.",
-        "issue_type": "academic_tone",
+        "issue_types": ["academic_tone"],
         "user_command": "sửa cho tự nhiên hơn",
     }
     response = client.post("/api/refine", json=payload)
@@ -57,7 +58,7 @@ def test_refine_invalid_issue_type(client, monkeypatch):
     payload = {
         "paragraph_text": "Đoạn văn thử.",
         "sentence": "Tận dụng nguồn lực.",
-        "issue_type": "invalid_type",
+        "issue_types": ["invalid_type"],
         "user_command": "sửa cho tự nhiên hơn",
     }
     response = client.post("/api/refine", json=payload)

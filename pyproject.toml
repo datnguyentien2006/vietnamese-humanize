@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "vietnamese-writing-skills"
 version = "0.4.6"
-description = "Agent Skills and lightweight tools for clearer, more natural Vietnamese writing"
+description = "Vietnamese writing linter (viet-writing-lint) and humanizer toolkit"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
@@ -32,11 +32,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/longhang2004/vietnamese-humanizer"
-Repository = "https://github.com/longhang2004/vietnamese-humanizer"
-Issues = "https://github.com/longhang2004/vietnamese-humanizer/issues"
-Changelog = "https://github.com/longhang2004/vietnamese-humanizer/blob/main/CHANGELOG.md"
-Documentation = "https://github.com/longhang2004/vietnamese-humanizer/tree/main/docs"
+Homepage = "https://github.com/datnguyentien2006/vietnamese-humanize"
+Repository = "https://github.com/datnguyentien2006/vietnamese-humanize"
+Issues = "https://github.com/datnguyentien2006/vietnamese-humanize/issues"
 
 [project.optional-dependencies]
 dev = [
@@ -45,14 +43,12 @@ dev = [
   "ruff>=0.6",
   "twine>=5,<7",
 ]
+llm = [
+  "google-genai>=0.1.1",
+]
 
 [project.scripts]
 viet-writing-lint = "vietnamese_writing_skills.cli.lint:main"
-viet-writing-validate-skills = "vietnamese_writing_skills.cli.validate_skills:main"
-viet-writing-validate-patterns = "vietnamese_writing_skills.cli.validate_patterns:main"
-viet-writing-validate-examples = "vietnamese_writing_skills.cli.validate_examples:main"
-viet-writing-benchmark = "vietnamese_writing_skills.cli.benchmarks:main"
-viet-writing-generate-docs = "vietnamese_writing_skills.cli.generate_docs:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/vietnamese_writing_skills"]
@@ -60,21 +56,17 @@ packages = ["src/vietnamese_writing_skills"]
 [tool.hatch.build.targets.wheel.force-include]
 "patterns" = "vietnamese_writing_skills/data/patterns"
 "skills" = "vietnamese_writing_skills/data/skills"
-"examples" = "vietnamese_writing_skills/data/examples"
-"benchmarks" = "vietnamese_writing_skills/data/benchmarks"
 
 [tool.hatch.build.targets.sdist]
 include = [
   "src/",
   "patterns/",
   "skills/",
-  "examples/",
-  "benchmarks/",
   "tests/",
-  "docs/",
   "README.md",
-  "README.vi.md",
   "LICENSE",
-  "CHANGELOG.md",
   "pyproject.toml",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

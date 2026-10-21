@@ -8,9 +8,6 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-benchmarks/results/*
-!benchmarks/results/.gitkeep
-!benchmarks/results/README.md
 
 # CodeGraph local index and generated agent rules
 .codegraph/

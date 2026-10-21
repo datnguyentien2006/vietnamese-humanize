@@ -1,62 +1,48 @@
-**English** | [Tiếng Việt](CONTRIBUTING.vi.md)
-
 # Contributing
 
-Contributions help Vietnamese Writing Skills cover a wider range of Vietnamese usage.
+Thanks for wanting to contribute. This is a small personal project, so the process is lightweight.
 
-## Before opening a pull request
+## Report an issue
 
-1. Search for similar IDs, names, and signals in `docs/generated-patterns.md`.
-2. Read `docs/pattern-authoring-guide.md`.
-3. Remove personal information and confirm that you may use the examples.
-4. Update the related data, package code, tests, and documentation.
-5. Run the generators, validators, tests, and build commands in the README.
-6. Add user-visible changes to `CHANGELOG.md`.
+Open a [GitHub issue](https://github.com/datnguyentien2006/vietnamese-humanize/issues) with:
 
-## New examples
+- What you expected vs. what happened (backend error, lint finding, UI behavior).
+- A short Vietnamese sample text that reproduces the problem directly in the prompt, or as a code block.
+- If it is a lint/false-positive report: the pattern ID from the finding (`--format json` output) and the structure being flagged.
 
-Every example must include:
+## Set up a development environment
 
-- complete input and context so the output can be verified;
-- output that adds no facts, metrics, sources, causes, or experiences;
-- consistent `output_mode`, `gold_output_mode`, and `gold_rewrite` values;
-- `must_preserve` and `must_not_add` constraints;
-- an existing pattern ID;
-- `preservation_review` with one of these provenance states: `unreviewed`, `agent-reviewed`, `maintainer-reviewed`, or `independently-reviewed`;
-- review notes when the example has been reviewed.
+Python 3.11+ and Node.js 20+.
 
-Do not mark an `unreviewed` example as a gold rewrite. `review_comment` and `needs_author_decision` may be gold output modes, but they are not gold rewrites. Only say that a detail "appears elsewhere in the article" when the context includes that content.
+```bash
+# Python package + tests
+python -m venv .venv && .venv/Scripts/pip install -e ".[dev]"   # use .venv/bin/ on Linux/macOS
+pytest
 
-## New patterns
+# Backend
+cd web/backend
+pip install -r requirements.txt
+copy .env.example .env          # set GROQ_API_KEY, REWRITE_ENABLED=true
+pytest tests
 
-A pattern needs a finding type, scope, aggregation, severity, confidence, false-positive risk, two bad examples, two good examples with modes, exceptions, tests, and an example that adds no facts. State the observation source and describe legitimate uses of the structure.
+# Frontend
+cd web/frontend
+npm ci
+npm test
+```
 
-A pattern based on one person's intuition may begin as a proposal to collect examples. Do not add it to the stable catalog yet.
+Style: run `ruff check .` before committing Python changes. Keep changes consistent with the surrounding code; upstream-era names (`Vietnamese Writing Skills`, `vietnamese_writing_skills`) are kept intentionally.
 
-## Conventions
+## Rules
 
-- IDs use the `VI-HUM`, `VI-TRA`, `VI-GRA`, or `VI-STY` namespace.
-- `name` uses lowercase ASCII and hyphens.
-- User-facing Vietnamese documentation is written in Vietnamese; identifiers and technical terms may remain in English.
-- Do not add AI-detection scores, detector-bypass claims, or heuristics intended to evade checks.
-- Do not treat regional variation as an error without a specific register constraint.
-- Importable logic belongs in `vietnamese_writing_skills`; `scripts/` contains compatibility wrappers only.
+- **Do not commit `.env` files or API keys.** `.gitignore` excludes `web/backend/.env` — verify before pushing.
+- **Do not change facts in patterns.** Pattern YAML entries must describe a real, reproducible Vietnamese-language signal. Include one bad example and one good example per pattern.
+- **No detector-evasion features.** Contributions that add "AI score", authorship detection, or evasion advice will be rejected.
+- Keep Web UI text in Vietnamese (the app's audience is Vietnamese writers); code comments may be English or Vietnamese.
 
-## Writing documentation
+## Pull requests
 
-Write each language as its own document; do not translate sentence by sentence. Do not call a structure wrong merely because it sounds AI-generated. Prefer clear verbs and consistent terminology.
-
-## Reporting errors and evaluation results
-
-For a false positive, provide the shortest passage with enough context, its domain, register, finding type, expected output, and an explanation of why the structure is legitimate. Do not submit sensitive data.
-
-## Release checklist
-
-Before pushing a release tag:
-
-1. Check that CI is green on `main`.
-2. Check that `pyproject.toml`, `vietnamese_writing_skills.__version__`, and `CHANGELOG.md` use the same version.
-3. Run the repository checks, build the wheel and sdist, then run `twine check dist/*`.
-4. Check that the GitHub `pypi` environment and PyPI Trusted Publisher target `.github/workflows/release.yml`.
-5. Review the wheel contents and install it in a clean virtual environment.
-6. Push the matching `vX.Y.Z` tag after every check passes.
+1. Fork, create a feature branch (`feat/report-refiner-fix`, not `patch-1`).
+2. Run `pytest`, `pytest web/backend/tests`, and `npm test` — all green.
+3. Describe what changed and why in the PR description.
+4. Small, focused PRs are merged faster than large ones.

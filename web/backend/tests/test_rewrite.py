@@ -93,7 +93,7 @@ def test_rewrite_sends_structured_prompt_to_groq(monkeypatch, mock_groq):
 
     kwargs = mock_groq.chat.completions.create.call_args.kwargs
     messages = kwargs["messages"]
-    assert kwargs["model"] == "llama-3.3-70b-versatile"
+    assert kwargs["model"] == "openai/gpt-oss-120b"
 
     system_msg = next(m for m in messages if m["role"] == "system")
     user_msg = next(m for m in messages if m["role"] == "user")
@@ -105,7 +105,9 @@ def test_rewrite_sends_structured_prompt_to_groq(monkeypatch, mock_groq):
     assert "Hướng dẫn skill" in user_msg["content"]
     assert "Chiến lược sửa" in user_msg["content"]
     assert "Danh sách issue cần sửa" in user_msg["content"]
-    assert "Văn bản gốc" in user_msg["content"]
+    assert "<ORIGINAL>" in user_msg["content"]
+    assert "</ORIGINAL>" in user_msg["content"]
+    assert "Trong bối cảnh không ngừng phát triển" in user_msg["content"]
 
 
 def test_rewrite_applies_valid_edit(monkeypatch, mock_groq):
@@ -186,6 +188,7 @@ def test_rewrite_provider_failure_does_not_expose_exception_details(
     provider = Mock(side_effect=RuntimeError(f"{secret}: {raw_fragment}"))
     monkeypatch.setattr(settings, "REWRITE_ENABLED", True)
     monkeypatch.setattr(settings, "GROQ_API_KEY", "gsk_test_key")
+    monkeypatch.setattr(settings, "DEBUG_ERRORS", False)
     monkeypatch.setattr("app.routers.rewrite.generate_rewrite", provider)
     payload = {
         "text": "Trong bối cảnh không ngừng phát triển, doanh nghiệp cần đổi mới.",
@@ -195,7 +198,7 @@ def test_rewrite_provider_failure_does_not_expose_exception_details(
     response = client.post("/api/rewrite", json=payload)
 
     assert response.status_code == 500
-    assert response.json()["detail"]["message"] == "Không thể xử lý yêu cầu viết lại."
+    assert response.json()["detail"] == "Không thể xử lý yêu cầu viết lại."
     assert secret not in response.text
     assert raw_fragment not in response.text
 
