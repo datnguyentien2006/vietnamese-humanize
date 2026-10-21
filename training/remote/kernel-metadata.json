@@ -1,0 +1,14 @@
+{
+  "id": "PUT_YOUR_KAGGLE_USERNAME/humanizer-vi-train",
+  "code_file": "humanizer_colab.ipynb",
+  "language_type": "notebook",
+  "id_is_slug": false,
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "kernel_sources": [],
+  "competition_sources": [],
+  "model_sources": []
+}

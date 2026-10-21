@@ -129,6 +129,7 @@ training/
   train_qlora.py       4-bit QLoRA fine-tune (TRL + PEFT + bitsandbytes)
   merge_and_export.py  merge LoRA into base; optional AWQ export for vLLM
   serve/runpod_vllm.md self-hosting guide + future backend contract
+  remote/              generated Colab/Kaggle notebook + running instructions
   data/raw/            put corpora here (gitignored)
   data/pairs/          curated {"input","output"} rewrite pairs (gitignored)
   data/sft/            generated train/val JSONL (gitignored)
