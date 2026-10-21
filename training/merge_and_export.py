@@ -38,7 +38,7 @@ def resolve(path_value: str, override: str | None) -> Path:
     return Path(ROOT / (override or path_value))
 
 
-def merge(config: dict, merged_dir: Path, model_override: str | None) -> None:
+def merge(config: dict, merged_dir: Path, model_override: str | None, merge_device: str) -> None:
     from peft import PeftModel
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -48,11 +48,11 @@ def merge(config: dict, merged_dir: Path, model_override: str | None) -> None:
         print(f"[skip] merged model tồn tại sẵn: {merged_dir.as_posix()}")
         return
 
-    print(f"[load] base: {model_id} (fp16, merge LoRA không quantize)")
+    print(f"[load] base: {model_id} (fp16, device_map={merge_device})")
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         torch_dtype=torch.float16,
-        device_map="cpu",
+        device_map=merge_device,
         trust_remote_code=True,
         low_cpu_mem_usage=True,
     )
@@ -95,6 +95,11 @@ def main() -> None:
     )
     parser.add_argument("--merged-dir", help="override merged output dir (vd: Google Drive)")
     parser.add_argument("--model", help="override base checkpoint id used for the merge")
+    parser.add_argument(
+        "--merge-device",
+        default="cpu",
+        help="device_map for the merge (cpu | auto). auto allows accelerate to shift layers between GPU/CPU — needed for 7B merges on small-RAM hosts",
+    )
     args = parser.parse_args()
 
     config = load_config()
@@ -110,7 +115,7 @@ def main() -> None:
         export_awq(merged_dir, awq_dir)
         return
 
-    merge(config, merged_dir, args.model)
+    merge(config, merged_dir, args.model, args.merge_device)
     if args.export_awq:
         export_awq(merged_dir, awq_dir)
 
