@@ -16,10 +16,10 @@ from app.routers import (
     admin,
     contributions,
     health,
+    humanize,
     lint,
     patterns,
-    report_refiner,
-    rewrite,
+    tools,
 )
 
 
@@ -61,7 +61,7 @@ app.add_middleware(TrustedProxyHeadersMiddleware)
 app.include_router(health.router)
 app.include_router(lint.router)
 app.include_router(patterns.router)
-app.include_router(rewrite.router)
-app.include_router(report_refiner.router)
+app.include_router(humanize.router)
+app.include_router(tools.router)
 app.include_router(contributions.router)
 app.include_router(admin.router)

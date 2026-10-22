@@ -44,7 +44,9 @@ class ReportIssue:
 
 # QUAN TRỌNG: Không dùng str.format() cho prompt này vì prompt chứa
 # nhiều dấu { } trong ví dụ JSON. Ta sẽ dùng replace() thủ công.
-REPORT_ANALYZER_PROMPT = """Bạn là biên tập viên báo cáo tiếng Việt có kinh nghiệm. Nhiệm vụ: đọc đoạn văn sau và tìm những chỗ có thể khiến người đọc cảm thấy văn bản "máy móc", "xa cách", hoặc "thiếu tự nhiên".
+REPORT_ANALYZER_PROMPT = """Bạn là biên tập viên báo cáo tiếng Việt có kinh
+nghiệm. Nhiệm vụ: đọc đoạn văn sau và tìm những chỗ có thể khiến người đọc
+cảm thấy văn bản "máy móc", "xa cách", hoặc "thiếu tự nhiên".
 
 ## Các loại vấn đề cần tìm
 

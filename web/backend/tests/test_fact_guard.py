@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Tests for the fact-preservation guard in _apply_edits."""
 
 from __future__ import annotations
@@ -6,12 +5,16 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import pytest
-
 BACKEND = Path(__file__).resolve().parents[1] / "web" / "backend"
 sys.path.insert(0, str(BACKEND))
 
+from app.services import fact_guard  # noqa: E402
 from app.services.rewriter import _apply_edits, _fact_losses  # noqa: E402
+
+WHOLE_ORIGINAL = (
+    "Doanh thu quý 3 đạt 1.850 tỷ đồng, tăng 56,7% so với cùng kỳ, "
+    "công bố ngày 8/10/2025."
+)
 
 
 def test_fact_losses_detects_dropped_number() -> None:
@@ -63,3 +66,29 @@ def test_apply_edits_still_applies_clean_edit() -> None:
     new_text, applied, rejected = _apply_edits(text, edits)
     assert new_text == "Doanh thu tăng 12%."
     assert applied and not rejected
+
+
+def test_diff_fact_tokens_clean_when_separator_style_changes() -> None:
+    rewritten = WHOLE_ORIGINAL.replace("1.850", "1850")
+    result = fact_guard.diff_fact_tokens(WHOLE_ORIGINAL, rewritten)
+    assert result["lost_tokens"] == []
+    assert result["added_tokens"] == []
+
+
+def test_diff_fact_tokens_catches_lost_date() -> None:
+    rewritten = WHOLE_ORIGINAL.replace("công bố ngày 8/10/2025", "công bố trong tháng 10")
+    result = fact_guard.diff_fact_tokens(WHOLE_ORIGINAL, rewritten)
+    assert "8/10/2025" in result["lost_tokens"]
+
+
+def test_diff_fact_tokens_catches_lost_number() -> None:
+    rewritten = WHOLE_ORIGINAL.replace("tăng 56,7%", "tăng mạnh")
+    result = fact_guard.diff_fact_tokens(WHOLE_ORIGINAL, rewritten)
+    assert "567" in result["lost_tokens"]
+
+
+def test_diff_fact_tokens_reports_added_tokens() -> None:
+    rewritten = WHOLE_ORIGINAL + " Mức lãi suất 12% được ghi nhận quý trước."
+    result = fact_guard.diff_fact_tokens(WHOLE_ORIGINAL, rewritten)
+    assert "12" in result["added_tokens"]
+    assert result["lost_tokens"] == []

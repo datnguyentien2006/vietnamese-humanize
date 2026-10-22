@@ -92,12 +92,6 @@ class SkillsResponse(BaseModel):
     skills: list[SkillItem]
 
 
-class RewriteRequest(BaseModel):
-    text: str = Field(..., min_length=1, max_length=20000)
-    skill: str = "humanizer-vi"
-    issue_ids: list[str] | None = None
-
-
 class RewriteEdit(BaseModel):
     issue_pattern_id: str
     find_preview: str
@@ -129,18 +123,6 @@ class RewriteResponse(BaseModel):
     stats: RewriteStats | None = None
     applied_edits: list[RewriteEdit] = []
     unresolved_issues: list[UnresolvedIssue] = []
-
-
-class SuggestFixRequest(BaseModel):
-    text: str = Field(..., min_length=1, max_length=20000)
-    pattern_ids: list[str] = Field(default_factory=list)
-    skill: str = "humanizer-vi"
-
-
-class SuggestFixResponse(BaseModel):
-    suggestion: str
-    review_status: str = "unreviewed"
-    disclaimer: str = "Gợi ý do model sinh, cần người đọc kiểm chứng bảo toàn dữ kiện."
 
 
 class ContributionCreate(BaseModel):
@@ -180,52 +162,47 @@ class AdminContributionPatch(BaseModel):
 
 
 # ============================================================
-# v1.2 — Giảm đạo văn AI (Interactive Report Refiner)
+# v1.3 - Humanize văn bản (mô hình chuyên biệt + Groq fallback)
 # ============================================================
 
 
-class ScanReportIssue(BaseModel):
-    """Một vấn đề được AI phát hiện trong báo cáo."""
+class HumanizeRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=20000)
 
-    paragraph_index: int
-    paragraph_text: str
+
+class FactCheck(BaseModel):
+    lost_tokens: list[str] = []
+    added_tokens: list[str] = []
+
+
+class ReviewSuggestion(BaseModel):
     issue_type: str
-    sentence: str
+    excerpt: str
     reason: str
     question: str
     suggestions: list[str] = []
     confidence: int = 3
 
 
-class ScanReportRequest(BaseModel):
-    text: str = Field(..., min_length=1, max_length=50000)
+class HumanizeStats(BaseModel):
+    attempts: int = 0
+    latency_seconds: float = 0.0
+    total_issues: int | None = None
+    fixed: int | None = None
+    edits_applied: int | None = None
+    edits_rejected: int | None = None
+    verification_attempts: int | None = None
+    verification_passed: bool | None = None
 
 
-class ScanReportResponse(BaseModel):
-    issues: list[ScanReportIssue]
-    total_paragraphs: int
-    total_issues: int
-
-
-class RefineRequest(BaseModel):
-    """User gửi câu lệnh để AI sửa một câu cụ thể.
-
-    v1.2.1: nhận list issue_types để xử lý nhiều vấn đề trên cùng một câu
-    trong 1 lần gọi duy nhất.
-    """
-
-    paragraph_text: str = Field(..., min_length=1, max_length=10000)
-    sentence: str = Field(..., min_length=1, max_length=5000)
-    issue_types: list[str] = Field(..., min_length=1)
-    user_command: str = Field(..., min_length=1, max_length=2000)
-
-
-class RefineResponse(BaseModel):
-    refined_sentence: str
-    refined_paragraph: str
-    change_summary: str
-    review_status: str = "unreviewed"
-
+class HumanizeResponse(BaseModel):
+    rewrite: str
+    stats: HumanizeStats
+    # "humanizer-model" | "groq-fallback"
+    provider: str
+    fact_check: FactCheck
+    suggestions: list[ReviewSuggestion] = []
+    warnings: list[str] = []
 
 class DiffSegment(BaseModel):
     """Một đoạn trong diff."""

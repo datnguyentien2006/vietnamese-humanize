@@ -30,6 +30,11 @@ _CAPABILITY_DEFAULTS = {
     "ADMIN_API_ENABLED": False,
     "GROQ_API_KEY": None,
     "ADMIN_API_KEY": None,
+    "HUMANIZER_API_BASE": None,
+    "HUMANIZER_API_KEY": None,
+    "HUMANIZER_MODEL": "humanizer-vi",
+    "HUMANIZER_TIMEOUT_SECONDS": 45.0,
+    "HUMANIZER_FALLBACK_GROQ": True,
 }
 
 
@@ -100,6 +105,27 @@ def mock_groq():
 
         mock_choice = MagicMock()
         mock_choice.message.content = '{"edits": []}'
+
+        mock_completion = MagicMock()
+        mock_completion.choices = [mock_choice]
+
+        mock_client_instance.chat.completions.create.return_value = mock_completion
+        mock_client_cls.return_value = mock_client_instance
+        yield mock_client_instance
+
+
+@pytest.fixture
+def mock_groq_analyzer():
+    """Mock Groq client cho report_analyzer (gợi ý rà soát) — không có issue.
+
+    Test cụ thể có thể đổi `chat.completions.create.return_value...content`
+    để trả issues JSON.
+    """
+    with patch("app.services.report_analyzer.Groq") as mock_client_cls:
+        mock_client_instance = MagicMock()
+
+        mock_choice = MagicMock()
+        mock_choice.message.content = '{"issues": []}'
 
         mock_completion = MagicMock()
         mock_completion.choices = [mock_choice]

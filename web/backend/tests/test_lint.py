@@ -13,7 +13,7 @@ def test_health_endpoint(client):
     assert data["status"] == "ok"
     assert data["version"] == __version__
     assert data["capabilities"] == {
-        "rewrite": False,
+        "humanize": False,
         "contributions": False,
     }
 
@@ -21,9 +21,16 @@ def test_health_endpoint(client):
 def test_optional_routes_remain_mounted_when_capabilities_are_disabled():
     paths = app.openapi()["paths"]
 
-    assert "/api/rewrite" in paths
+    assert "/api/humanize" in paths
+    assert "/api/vocabulary" in paths
+    assert "/api/diff" in paths
     assert "/api/contributions" in paths
     assert "/api/admin/contributions" in paths
+    # v1.2 endpoints were removed in v1.3.
+    assert "/api/rewrite" not in paths
+    assert "/api/suggest-fix" not in paths
+    assert "/api/scan-report" not in paths
+    assert "/api/refine" not in paths
 
 
 def test_api_surfaces_expose_core_runtime_version(client):

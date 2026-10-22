@@ -5,7 +5,8 @@ Pipeline:
   1. Load all self-authored AI-style samples in evaluation/samples/*.txt.
      Each sample carries YAML-ish front metadata (flavour, description).
   2. Humanize each sample with the REAL production path
-     (web/backend generate_rewrite: lint -> Groq edits -> verified apply).
+     (v1.3: dedicated humanizer model when HUMANIZER_API_BASE is set,
+     otherwise the Groq edits pipeline — picked by humanize_pipeline).
   3. Score: static metrics (metrics.py) + LLM-as-judge (judge.py).
   4. Write per-sample JSON + a summary to evaluation/results/.
 
@@ -56,15 +57,36 @@ def parse_sample(path: Path) -> dict:
 
 
 def humanize(text: str) -> dict:
-    """Call the production rewrite service directly (no HTTP hop)."""
-    from app.services.rewriter import generate_rewrite
+    """Call the v1.3 production path directly (no HTTP hop).
 
-    response = generate_rewrite(text, skill="humanizer-vi", issue_ids=None)
+    Prefers the dedicated humanizer model (HUMANIZER_API_BASE); falls back
+    to the Groq pipeline. Records which provider answered so rounds are
+    comparable.
+    """
+    from app.services.humanize_pipeline import run_humanize
+
+    pipeline = run_humanize(text)
+    fact_check = pipeline.fact_check
+    warnings = list(pipeline.warnings)
+    if fact_check["lost_tokens"]:
+        warnings.append("FACT GUARD: lost tokens = " + ", ".join(fact_check["lost_tokens"]))
     return {
-        "rewritten": response.rewrite,
-        "stats": response.stats.model_dump(),
-        "applied_edits": [e.model_dump() for e in response.applied_edits],
-        "unresolved_issues": [u.model_dump() for u in response.unresolved_issues],
+        "rewritten": pipeline.rewrite,
+        "provider": pipeline.provider,
+        "stats": {
+            "attempts": pipeline.stats.get("attempts", 0),
+            "total_issues": pipeline.stats.get("total_issues"),
+            "fixed": pipeline.stats.get("fixed"),
+            "edits_applied": pipeline.stats.get("edits_applied"),
+            "edits_rejected": pipeline.stats.get("edits_rejected"),
+            "verification_attempts": pipeline.stats.get("verification_attempts"),
+            "verification_passed": pipeline.stats.get("verification_passed"),
+            "fact_lost_tokens": fact_check["lost_tokens"],
+            "fact_added_tokens": fact_check["added_tokens"],
+        },
+        "applied_edits": [],
+        "unresolved_issues": [],
+        "warnings": warnings,
     }
 
 

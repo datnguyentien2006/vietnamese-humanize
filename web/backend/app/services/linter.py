@@ -12,7 +12,6 @@ from app.schemas import (
     PatternItem,
 )
 
-
 # ============================================================
 # Fallback helpers: tự tính paragraph/sentence/position từ text
 # khi package không trả về đủ dữ liệu (bug v1.2).

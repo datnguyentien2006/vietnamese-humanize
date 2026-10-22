@@ -2,10 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-import re
 import time
-
-from collections import Counter
 
 from groq import Groq
 from vietnamese_writing_skills.cli.lint import lint_text
@@ -19,6 +16,12 @@ from app.schemas import (
     RewriteStats,
     UnresolvedIssue,
 )
+from app.services import fact_guard
+
+# Backward-compatible aliases: existing tests import _fact_losses from
+# rewriter, and callers keep the private names.
+_fact_losses = fact_guard.fact_losses
+_fact_tokens = fact_guard.fact_tokens
 
 logger = logging.getLogger(__name__)
 
@@ -386,31 +389,9 @@ def _propose_edits(text: str, issues: list[dict], skill_content: str) -> list[di
     return _parse_edits_response(raw)
 
 
-# Date tokens like 22/10/2025 must survive edits verbatim.
-_DATE_TOKEN_RE = re.compile(r"\b\d{1,2}/\d{1,2}(?:/\d{2,4})?\b")
-# Plain numeric tokens: canonical compare ignores thousand/decimal separators
-# so "1.850" == "1,850" == "1850", but a dropped number is caught.
-_NUM_TOKEN_RE = re.compile(r"\d+(?:[.,]\d+)*")
-
-
-def _fact_tokens(text: str) -> Counter:
-    """Counter of verifiable data tokens (dates + canonical numbers) in text."""
-    tokens: Counter = Counter()
-    residue = text
-    for match in _DATE_TOKEN_RE.findall(text):
-        tokens[match] += 1
-    residue = _DATE_TOKEN_RE.sub(" ", text)
-    for match in _NUM_TOKEN_RE.findall(residue):
-        canonical = match.replace(".", "").replace(",", "")
-        tokens[canonical] += 1
-    return tokens
-
-
-def _fact_losses(find: str, replace: str) -> list[str]:
-    """Data items present in `find` that vanished in `replace`."""
-    before = _fact_tokens(find)
-    before.subtract(_fact_tokens(replace))
-    return [token for token, deficit in before.items() if deficit > 0]
+# Fact guard lives in app.services.fact_guard (shared by rewriter and the
+# whole-text humanizer); `_fact_tokens`/`_fact_losses` are re-exported above
+# as aliases for existing callers and tests.
 
 
 def _apply_edits(

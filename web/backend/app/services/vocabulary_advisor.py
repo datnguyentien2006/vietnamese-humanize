@@ -33,7 +33,6 @@ FORMAL_TO_CASUAL: dict[str, list[str]] = {
     "đối mặt": ["gặp phải", "chạm trán"],
     "giải quyết": ["xử lý", "làm xong"],
     "khắc phục": ["sửa", "sửa chữa"],
-    "phát triển": ["làm cho lớn hơn", "mở rộng"],
     "mở rộng": ["làm cho lớn hơn", "phát triển thêm"],
     "cải tiến": ["cải thiện", "làm tốt hơn"],
     "cải thiện": ["làm tốt hơn", "sửa cho tốt hơn"],

@@ -23,12 +23,32 @@ def _has_value(value: str | None) -> bool:
     return bool(value and value.strip())
 
 
+def humanize_enabled(config: Settings | None = None) -> bool:
+    """True khi `/api/humanize` có ít nhất một provider dùng được.
+
+    Ưu tiên mô hình chuyên biệt (HUMANIZER_API_BASE); nếu chưa phục vụ mô hình
+    thì pipeline Groq fallback đảm nhiệm, nhưng chỉ khi HUMANIZER_FALLBACK_GROQ
+    và GROQ_API_KEY cùng bật. Fail-closed: thiếu cả hai → False → 503.
+    """
+    if config is None:
+        config = settings
+    if _has_value(config.HUMANIZER_API_BASE):
+        return True
+    return bool(config.HUMANIZER_FALLBACK_GROQ) and _has_value(config.GROQ_API_KEY)
+
+
 def validate_capability_settings(config: Settings | None = None) -> None:
     if config is None:
         config = settings
 
     if config.REWRITE_ENABLED and not _has_value(config.GROQ_API_KEY):
         raise ValueError("GROQ_API_KEY is required when REWRITE_ENABLED is true.")
+
+    if _has_value(config.HUMANIZER_API_BASE) and config.HUMANIZER_TIMEOUT_SECONDS <= 0:
+        raise ValueError(
+            "HUMANIZER_TIMEOUT_SECONDS must be positive when HUMANIZER_API_BASE "
+            "is configured."
+        )
 
     if config.ADMIN_API_ENABLED:
         admin_key = (config.ADMIN_API_KEY or "").strip()
@@ -45,8 +65,8 @@ def validate_capability_settings(config: Settings | None = None) -> None:
             )
 
 
-def require_rewrite_enabled() -> None:
-    if not settings.REWRITE_ENABLED:
+def require_humanize_enabled() -> None:
+    if not humanize_enabled():
         raise HTTPException(status_code=503, detail=_DISABLED_DETAIL)
 
 
@@ -78,6 +98,6 @@ def capability_route_class(check: Callable[[], None]) -> type[APIRoute]:
 
 def public_capabilities() -> dict[str, bool]:
     return {
-        "rewrite": settings.REWRITE_ENABLED and _has_value(settings.GROQ_API_KEY),
+        "humanize": humanize_enabled(),
         "contributions": settings.CONTRIBUTIONS_ENABLED,
     }

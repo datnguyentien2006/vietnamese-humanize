@@ -10,10 +10,11 @@ from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
 from app.capabilities import (
+    humanize_enabled,
     public_capabilities,
     require_admin_enabled,
     require_contributions_enabled,
-    require_rewrite_enabled,
+    require_humanize_enabled,
     validate_capability_settings,
 )
 from app.config import Settings, settings
@@ -26,6 +27,11 @@ CAPABILITY_ENV_VARS = (
     "ADMIN_API_ENABLED",
     "GROQ_API_KEY",
     "ADMIN_API_KEY",
+    "HUMANIZER_API_BASE",
+    "HUMANIZER_API_KEY",
+    "HUMANIZER_MODEL",
+    "HUMANIZER_TIMEOUT_SECONDS",
+    "HUMANIZER_FALLBACK_GROQ",
 )
 
 
@@ -128,6 +134,50 @@ def test_rewrite_enabled_requires_a_non_empty_groq_key(groq_key):
         validate_capability_settings(config)
 
 
+def test_humanize_enabled_with_dedicated_model_only():
+    config = Settings(HUMANIZER_API_BASE="https://host:8000/v1", _env_file=None)
+
+    assert humanize_enabled(config) is True
+
+
+def test_humanize_enabled_with_groq_fallback():
+    config = Settings(GROQ_API_KEY="gsk_test_key", HUMANIZER_FALLBACK_GROQ=True,
+                      _env_file=None)
+
+    assert humanize_enabled(config) is True
+
+
+def test_humanize_disabled_when_fallback_off_and_no_model():
+    config = Settings(GROQ_API_KEY="gsk_test_key", HUMANIZER_FALLBACK_GROQ=False,
+                      _env_file=None)
+
+    assert humanize_enabled(config) is False
+
+
+def test_humanize_disabled_without_groq_key():
+    config = Settings(HUMANIZER_FALLBACK_GROQ=True, GROQ_API_KEY=None, _env_file=None)
+
+    assert humanize_enabled(config) is False
+
+
+def test_humanize_timeout_must_be_positive_with_model():
+    config = Settings(
+        HUMANIZER_API_BASE="https://host:8000/v1",
+        HUMANIZER_TIMEOUT_SECONDS=0.0,
+        _env_file=None,
+    )
+
+    with pytest.raises(ValueError, match="HUMANIZER_TIMEOUT_SECONDS"):
+        validate_capability_settings(config)
+
+
+def test_humanize_timeout_check_skipped_without_model():
+    config = Settings(HUMANIZER_API_BASE=None, HUMANIZER_TIMEOUT_SECONDS=0.0,
+                      _env_file=None)
+
+    validate_capability_settings(config)
+
+
 def test_admin_can_be_enabled_with_a_strong_key():
     config = Settings(ADMIN_API_ENABLED=True, ADMIN_API_KEY="a" * 32, _env_file=None)
 
@@ -154,30 +204,31 @@ def test_admin_enabled_rejects_missing_short_or_placeholder_keys(admin_key):
 
 
 def test_public_capabilities_include_only_effective_public_features(monkeypatch):
-    monkeypatch.setattr(settings, "REWRITE_ENABLED", True)
+    monkeypatch.setattr(settings, "HUMANIZER_API_BASE", None)
+    monkeypatch.setattr(settings, "HUMANIZER_FALLBACK_GROQ", True)
     monkeypatch.setattr(settings, "GROQ_API_KEY", "   ")
     monkeypatch.setattr(settings, "CONTRIBUTIONS_ENABLED", True)
     monkeypatch.setattr(settings, "ADMIN_API_ENABLED", True)
     monkeypatch.setattr(settings, "ADMIN_API_KEY", "a" * 32)
 
     assert public_capabilities() == {
-        "rewrite": False,
+        "humanize": False,
         "contributions": True,
     }
 
 
 @pytest.mark.parametrize(
-    ("dependency", "setting_name"),
-    [
-        (require_rewrite_enabled, "REWRITE_ENABLED"),
-        (require_contributions_enabled, "CONTRIBUTIONS_ENABLED"),
-        (require_admin_enabled, "ADMIN_API_ENABLED"),
-    ],
+    "dependency",
+    [require_humanize_enabled, require_contributions_enabled, require_admin_enabled],
 )
 def test_disabled_capability_dependencies_return_stable_503(
-    monkeypatch, dependency, setting_name
+    monkeypatch, dependency
 ):
-    monkeypatch.setattr(settings, setting_name, False)
+    monkeypatch.setattr(settings, "HUMANIZER_API_BASE", None)
+    monkeypatch.setattr(settings, "HUMANIZER_FALLBACK_GROQ", False)
+    monkeypatch.setattr(settings, "GROQ_API_KEY", None)
+    monkeypatch.setattr(settings, "CONTRIBUTIONS_ENABLED", False)
+    monkeypatch.setattr(settings, "ADMIN_API_ENABLED", False)
 
     with pytest.raises(HTTPException) as exc_info:
         dependency()
@@ -186,10 +237,16 @@ def test_disabled_capability_dependencies_return_stable_503(
     assert exc_info.value.detail == "Capability is disabled."
 
 
+def test_humanize_dependency_monkeypatches_to_enabled(monkeypatch):
+    monkeypatch.setattr(settings, "GROQ_API_KEY", "gsk_test_key")
+    monkeypatch.setattr(settings, "HUMANIZER_FALLBACK_GROQ", True)
+
+    assert require_humanize_enabled() is None
+
+
 @pytest.mark.parametrize(
     ("dependency", "setting_name"),
     [
-        (require_rewrite_enabled, "REWRITE_ENABLED"),
         (require_contributions_enabled, "CONTRIBUTIONS_ENABLED"),
         (require_admin_enabled, "ADMIN_API_ENABLED"),
     ],
