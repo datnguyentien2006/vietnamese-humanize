@@ -2,10 +2,11 @@
 
 The tool's mission: rewrite AI-generated Vietnamese text to read naturally,
 preserving meaning and facts (numbers, dates, names), with an interactive
-review-and-edit experience. The current Groq-based pipeline (lint → manual
-editing → AI suggest-fix → report refiner) works and stays live, but it
-plateaued: manual-style rewrites still leave the result detectably templated.
-The next step is a model fine-tuned on naturally written human Vietnamese.
+review-and-edit experience. The first version went through a per-issue Groq
+pipeline (lint → manual editing → AI suggest-fix → report refiner) which
+plateaued: manual-style rewrites still left the result detectably templated.
+The next step is a model fine-tuned on naturally written human Vietnamese,
+behind a single-screen "Humanize văn bản" workflow.
 
 Phase order is deliberate: data first, then training, serving, and only then
 switching the live web app.
@@ -52,7 +53,7 @@ switching the live web app.
 - **Exit criteria:** OpenAI-compatible endpoint responds in scope; latency
   <20 s for a 400-word paragraph.
 
-## Phase 5 — Backend swap
+## Phase 5 — Backend swap (shipped in v1.3)
 
 - Rewrite service points at `HUMANIZER_API_BASE` (env-only, no SDK); keep
   Groq as a fallback flag initially.
@@ -61,8 +62,12 @@ switching the live web app.
 - "Where does this figure come from" suggestions stay powered by the existing
   report-analyzer issue types (`unverified_data`, `missing_evidence`), now
   shown attached to the final rewrite.
-- **Exit criteria:** the new flow is default; old per-issue pipeline reachable
-  but not required.
+- **Status (v1.3):** backend done — `POST /api/humanize` (5/min) replaced the
+  v1.2 endpoints (`/api/rewrite` and friends removed); the v1.2 per-issue
+  frontend was rebuilt into the single-screen workflow (`Humanize Text v1.3`);
+  the inference prompt is locked to `training/task_prompts.py` by a test.
+  Remaining: serve the fine-tuned checkpoint and set `HUMANIZER_API_BASE` —
+  until then the Groq fallback answers every request.
 
 ## Phase 6 — Evaluation & iteration
 

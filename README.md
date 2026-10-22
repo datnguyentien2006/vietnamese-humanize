@@ -2,7 +2,7 @@
 
 Tools for editing Vietnamese prose without changing its facts. This repository contains:
 
-- **A web application** — a FastAPI backend + Next.js frontend that lints a text, then helps you fix each issue manually or with AI.
+- **A web application** — a FastAPI backend + Next.js frontend implementing the single-screen "Humanize văn bản" workflow: paste AI text → the whole text is rewritten → review the before/after diff, edit manually, and act on review suggestions.
 - **`viet-writing-lint`, a rule-based linting CLI** for Vietnamese prose (this project's Python package is `vietnamese-writing-skills`, imported as `vietnamese_writing_skills`).
 - **`humanize.py`, a standalone CLI** that rewrites a whole document with an LLM using the bundled `skills/humanizer-vi/SKILL.md` prompt.
 - **`training/`, a fine-tuning pipeline (under construction)** for a dedicated Vietnamese humanizer model - dataset prep from human-written corpora, QLoRA training, and AWQ export for a self-hosted vLLM endpoint.
@@ -29,15 +29,22 @@ score — good, but not the goal. The next step (tracked in
 - Engine: QLoRA fine-tune of Qwen2.5-14B-Instruct, exported to AWQ and served
   from a self-hosted vLLM endpoint. Everything lives under [`training/`](training/README.md).
 
-Until the trained model is ready, the web app keeps the current Groq pipeline.
+Until the trained model is served, the web app runs on the Groq fallback
+(`HUMANIZER_FALLBACK_GROQ=true`, the default), so the site stays usable while
+serving is being set up.
 
-## How the web app works
+## How the web app works (v1.3 — single-screen "Humanize văn bản")
 
-1. **Lint** — paste text and select the skills to check against. The frontend shows findings grouped by issue, with occurrences highlighted inside the page.
-2. **Edit** — every issue card opens an editable view of its matched text. You rewrite it yourself, or use "Gợi ý sửa bằng AI" to get an AI suggestion per issue.
-3. **Refine** — the Report Refiner scans the document paragraph by paragraph (9 issue types: unverified data, academic tone, long sentence, missing evidence, logic gap, repetition, vague reference, passive overuse, register mismatch), then executes your natural-language command on each flagged sentence, shows a before/after diff, and pushes the result back into the editor.
+1. **Paste** — drop the AI-flavoured text into the input (≤ 20,000 characters) and hit **"✨ Humanize văn bản"**. The whole text is rewritten in one shot — no per-issue editing required.
+2. **Review** — the result appears as a before/after diff with token-level highlighting. If a number or date is missing from the rewrite, the fact guard lists it verbatim in a warning banner. You can edit the text manually (with one-level undo) and copy the final version.
+3. **Suggestions** — review prompts are generated for the RESULT text from 9 issue types (unverified data, academic tone, long sentence, missing evidence, logic gap, repetition, vague reference, passive overuse, register mismatch), each with an excerpt, a reason, and a question to check (e.g. "Nguồn của số liệu 1.850 tỷ là gì?").
 
-LLM calls go to **Groq** (`openai/gpt-oss-120b` with `openai/gpt-oss-20b` as fallback; configurable via `GROQ_REWRITE_MODELS`). All AI features stay disabled until `GROQ_API_KEY` is set and `REWRITE_ENABLED=true`.
+Two providers behind one endpoint, chosen at runtime:
+
+- **Dedicated humanizer model** (`provider: "humanizer-model"`) — the fine-tuned checkpoint served from vLLM (see [`training/serve/runpod_vllm.md`](training/serve/runpod_vllm.md)), called OpenAI-compatible over `HUMANIZER_API_BASE`. Its inference prompt is frozen: `web/backend/app/services/humanizer_prompts.py` is a verbatim copy of [`training/task_prompts.py`](training/task_prompts.py), locked by a test (`tests/test_humanizer_prompts_lock.py`).
+- **Groq fallback** (`provider: "groq-fallback"`) — until the model is served, `HUMANIZER_FALLBACK_GROQ=true` keeps the site usable through the existing Groq pipeline (`openai/gpt-oss-120b` with `openai/gpt-oss-20b` as fallback; configurable via `GROQ_REWRITE_MODELS`).
+
+Every result passes the mechanical fact guard (`lost_tokens`/`added_tokens` diff of numbers and dates) and review suggestions fail softly — an analyzer outage never degrades the rewrite. When neither provider is configured, the feature answer is fail-closed (503) and the UI shows setup instructions instead of disabled API calls.
 
 ## The four skills
 
@@ -69,7 +76,7 @@ Requires Python 3.11+ and Node.js 20+.
 cd web/backend
 python -m venv .venv           # or: uv venv, uv pip install -e ../..
 .venv/Scripts/pip install -r requirements.txt   # Windows; use .venv/bin/ on Linux/macOS
-copy .env.example .env         # edit: set GROQ_API_KEY, REWRITE_ENABLED=true
+copy .env.example .env         # edit: set GROQ_API_KEY, HUMANIZER_API_BASE when the model is served
 .venv/Scripts/uvicorn app.main:app --reload
 ```
 
@@ -87,9 +94,14 @@ Open `http://localhost:3000`. The frontend reads `NEXT_PUBLIC_API_BASE_URL` (def
 
 | Variable | Purpose |
 | --- | --- |
-| `GROQ_API_KEY` | Required for all AI features (rewrite, suggest-fix, report refiner, scan) |
-| `GROQ_REWRITE_MODELS` | Comma-separated Groq models, tried in order |
-| `REWRITE_ENABLED` | Master switch for AI features (`false` keeps lint-only mode) |
+| `HUMANIZER_API_BASE` | OpenAI-compatible base URL of the dedicated humanizer model, e.g. `https://host:8000/v1` (vLLM). When set, `/api/humanize` uses the model |
+| `HUMANIZER_API_KEY` | Bearer key for the humanizer endpoint (`--api-key` of vLLM); leave empty for unauthenticated endpoints |
+| `HUMANIZER_MODEL` | Served model name, matching vLLM `--served-model-name` (default `humanizer-vi`) |
+| `HUMANIZER_TIMEOUT_SECONDS` | Per-attempt timeout for the humanizer call (default 45.0) |
+| `HUMANIZER_FALLBACK_GROQ` | When `true` (default), Groq keeps the site usable if the model is not served, fails, or loses facts after retry |
+| `GROQ_API_KEY` | Required for the Groq fallback and for review suggestions |
+| `GROQ_REWRITE_MODELS` | Comma-separated Groq models, tried in order (fallback pipeline only) |
+| `REWRITE_ENABLED` | Deprecated v1.2 master switch; v1.3 enables humanize via the HUMANIZER/GROQ settings above |
 | `DEBUG_ERRORS` | Return verbose per-attempt LLM error details in API errors (dev only — set `false` in production) |
 | `FRONTEND_ORIGIN` | CORS origins, comma-separated |
 | `CONTRIBUTIONS_ENABLED`, `ADMIN_API_ENABLED`, `ADMIN_API_KEY` | Optional contribution/admin endpoints (add database + postgres driver + `DATABASE_URL` when enabled) |
