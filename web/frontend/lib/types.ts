@@ -1,79 +1,56 @@
-export interface IssueOccurrence {
-  line: number;
-  column: number;
-  excerpt: string;
-  matched_text: string;
-  start: number;
-  end: number;
-  sentence: string;
-  sentence_start: number;
-  sentence_end: number;
-  paragraph: string;
-  paragraph_start: number;
-  paragraph_end: number;
-}
-
-export interface IssueItem {
-  pattern_id: string;
-  finding_type: "error" | "warning" | "preference" | "heuristic" | string;
-  severity: "high" | "medium" | "low" | string;
-  confidence: string;
-  scope: string;
-  line: number;
-  column: number;
-  excerpt: string;
-  message: string;
-  suggestion: string;
-  occurrences: IssueOccurrence[];
-  start: number;
-  end: number;
-  sentence: string;
-  sentence_start: number;
-  sentence_end: number;
-  paragraph: string;
-  paragraph_start: number;
-  paragraph_end: number;
-}
-
-export interface LintSummary {
-  total: number;
-  error: number;
-  warning: number;
-  preference: number;
-  heuristic: number;
-  note: string;
-}
-
-export interface LintResponse {
-  version: string;
-  summary: LintSummary;
-  issues: IssueItem[];
+export interface CapabilityFlags {
+  humanize: boolean;
+  contributions: boolean;
 }
 
 export interface HealthResponse {
   status: string;
   version: string;
-  capabilities: {
-    rewrite: boolean;
-    contributions: boolean;
-  };
+  capabilities: CapabilityFlags;
 }
 
-export interface PatternItem {
-  id: string;
-  name: string;
-  skill: string;
-  category: string;
-  finding_type: string;
-  severity: string;
-  summary: string;
-  why_it_matters: string;
-  rewrite_strategy: string;
+// ===== v1.3: Humanize =====
+
+export interface FactCheck {
+  lost_tokens: string[];
+  added_tokens: string[];
 }
 
-export interface PatternsResponse {
-  patterns: PatternItem[];
+export interface Suggestion {
+  issue_type: string;
+  excerpt: string;
+  reason: string;
+  question: string;
+  suggestions: string[];
+  confidence: number;
 }
+
+/**
+ * Thống kê lần humanize. `total_issues`, `fixed`, `edits_applied`,
+ * `edits_rejected`, `verification_attempts`, `verification_passed` có thể là
+ * null khi server dùng mô hình chuyên biệt (không chạy pipeline lint/verify).
+ */
+export interface HumanizeStats {
+  attempts: number;
+  latency_seconds: number;
+  total_issues?: number | null;
+  fixed?: number | null;
+  edits_applied?: number | null;
+  edits_rejected?: number | null;
+  verification_attempts?: number | null;
+  verification_passed?: boolean | null;
+}
+
+export interface HumanizeResponse {
+  rewrite: string;
+  stats?: HumanizeStats;
+  provider: "humanizer-model" | "groq-fallback";
+  fact_check: FactCheck;
+  suggestions: Suggestion[];
+  warnings: string[];
+}
+
+// ===== Contributor flow (vẫn dùng ở /contribute) =====
 
 export interface SkillItem {
   id: string;
@@ -84,45 +61,6 @@ export interface SkillItem {
 
 export interface SkillsResponse {
   skills: SkillItem[];
-}
-
-export interface RewriteEdit {
-  issue_pattern_id: string;
-  find_preview: string;
-  replace_preview: string;
-  reason: string;
-}
-
-export interface RewriteStats {
-  total_issues: number;
-  fixed: number;
-  skipped: number;
-  edits_applied: number;
-  edits_rejected: number;
-  verification_attempts: number;
-  verification_passed: boolean;
-}
-
-export interface UnresolvedIssue {
-  pattern_id: string;
-  line: number;
-  column: number;
-  message: string;
-}
-
-export interface RewriteResponse {
-  rewrite: string;
-  review_status: string;
-  disclaimer: string;
-  stats: RewriteStats | null;
-  applied_edits: RewriteEdit[];
-  unresolved_issues: UnresolvedIssue[];
-}
-
-export interface SuggestFixResponse {
-  suggestion: string;
-  review_status: string;
-  disclaimer: string;
 }
 
 export interface ContributionRequest {
@@ -139,93 +77,4 @@ export interface ContributionResponse {
   id: string;
   status: string;
   message: string;
-}
-
-// ===== Manual edit feature =====
-
-export type EditStatus = "editing" | "accepted" | "skipped";
-
-export interface Edit {
-  issueKey: string;
-  issue: IssueItem;
-  originalParagraph: string;
-  newParagraph: string;
-  paragraphStart: number;
-  paragraphEnd: number;
-  status: EditStatus;
-  acceptedAt?: number;
-}
-
-export interface HighlightRange {
-  start: number;
-  end: number;
-  issueKey: string;
-}
-
-// ===== v1.2: Report Refiner =====
-
-export interface ScanReportIssue {
-  paragraph_index: number;
-  paragraph_text: string;
-  issue_type: string;
-  sentence: string;
-  reason: string;
-  question: string;
-  suggestions: string[];
-  confidence: number;
-}
-
-export interface ScanReportResponse {
-  issues: ScanReportIssue[];
-  total_paragraphs: number;
-  total_issues: number;
-}
-
-/**
- * Nhóm nhiều ScanReportIssue cùng (paragraph_index, sentence).
- *
- * `paragraph_text` là đoạn văn hiện tại (có thể đã được cập nhật bởi các
- * accept trước đó trong cùng đoạn). Khi `is_stale = true`, nghĩa là câu
- * gốc của group này không còn tồn tại trong paragraph_text mới — cần bỏ
- * qua hoặc xử lý riêng.
- */
-export interface ReportIssueGroup {
-  paragraph_index: number;
-  paragraph_text: string;
-  sentence: string;
-  issue_types: string[];
-  reasons: string[];
-  question: string;
-  suggestions: string[];
-  confidence: number;
-  raw_issues: ScanReportIssue[];
-  is_stale?: boolean;
-  stale_reason?: string;
-}
-
-export interface RefineResponse {
-  refined_sentence: string;
-  refined_paragraph: string;
-  change_summary: string;
-  review_status: string;
-}
-
-export interface VocabularyResponse {
-  mapping: Record<string, string[]>;
-}
-
-export interface IssueTypeInfo {
-  key: string;
-  label: string;
-  description: string;
-}
-
-export interface RefineHistoryEntry {
-  group: ReportIssueGroup;
-  refinedSentence: string;
-  refinedParagraph: string;
-  changeSummary: string;
-  userCommand: string;
-  /** Đoạn văn trước khi user sửa (dùng để revert). */
-  oldParagraphText: string;
 }

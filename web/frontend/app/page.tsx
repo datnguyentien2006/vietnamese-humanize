@@ -1,370 +1,436 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useCapabilitiesStatus } from "../components/CapabilityNav";
 import { CompareView } from "../components/CompareView";
 import { Disclaimer } from "../components/Disclaimer";
-import { Editor } from "../components/Editor";
-import { IssueList } from "../components/IssueList";
-import { ReportRefiner } from "../components/ReportRefiner";
-import { fetchPatterns, fetchSkills, lintText } from "../lib/api";
-import { makeIssueKey } from "../lib/edit";
-import { Edit, LintResponse, PatternItem, SkillItem } from "../lib/types";
+import { SuggestionsPanel } from "../components/SuggestionsPanel";
+import { humanizeText } from "../lib/api";
+import { HumanizeResponse } from "../lib/types";
+
+const API_LIMIT = 20000;
+
+/**
+ * Văn bản mẫu mang phong cách AI: câu dài, số liệu chưa có nguồn,
+ * lặp ý và giọng "báo cáo tổng hợp". Tác giả tự viết để thử công cụ.
+ */
+const SAMPLE_TEXT = `Trong bối cảnh chuyển đổi số không ngừng phát triển, việc triển khai các giải pháp công nghệ hiện đại được xác định là một trong những yếu tố cốt lõi nhằm nâng cao năng lực cạnh tranh của doanh nghiệp trong krajina thị trường đầy biến động hiện nay. Theo số liệu tổng hợp, doanh thu của nhóm ngành tăng 1.850 tỷ đồng trong năm qua, cho thấy xu hướng tăng trưởng tích cực. Nền tảng này không chỉ giúp tối ưu quy trình vận hành mà còn mở ra nhiều cơ hội hợp tác chiến lược, đồng thời đặt ra những yêu cầu mới về quản trị rủi ro mà doanh nghiệp cần nghiên cứu, đánh giá và áp dụng một cách toàn diện.`;
+
+type Phase = "idle" | "humanizing" | "review";
+
+const DISABLED_BANNER =
+  "Chưa bật tính năng Humanize trên server. Đặt HUMANIZER_API_BASE hoặc GROQ_API_KEY rồi thử lại.";
+
+function countWords(text: string): number {
+  const trimmed = text.trim();
+  return trimmed ? trimmed.split(/\s+/).length : 0;
+}
 
 export default function HomePage() {
-  const [skills, setSkills] = useState<SkillItem[]>([]);
-  const [patterns, setPatterns] = useState<PatternItem[]>([]);
-  const [currentText, setCurrentText] = useState<string>("");
-  const [originalTextBeforeLint, setOriginalTextBeforeLint] = useState<string>("");
-  const [lintResult, setLintResult] = useState<LintResponse | null>(null);
-  const [edits, setEdits] = useState<Map<string, Edit>>(new Map());
-  /**
-   * Với mỗi paragraph (key = paragraph_start), đây là đoạn văn hiện tại sau
-   * khi áp dụng tất cả accepted edits trong paragraph đó. Giúp user khi mở
-   * issue khác trong cùng đoạn sẽ thấy đoạn văn đã cập nhật, không bị
-   * "vòng lặp sửa lỗi cũ".
-   */
-  const [paragraphDrafts, setParagraphDrafts] = useState<Map<number, string>>(
-    new Map()
-  );
-  const [loading, setLoading] = useState<boolean>(false);
+  const { capabilities, loaded } = useCapabilitiesStatus();
+  const [text, setText] = useState<string>("");
+  const [phase, setPhase] = useState<Phase>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [showCompare, setShowCompare] = useState<boolean>(false);
-  const [showRefiner, setShowRefiner] = useState<boolean>(false);
+
+  const [result, setResult] = useState<HumanizeResponse | null>(null);
+  const [originalText, setOriginalText] = useState<string>("");
+  const [currentText, setCurrentText] = useState<string>("");
+  const [lastResultBeforeEdit, setLastResultBeforeEdit] = useState<
+    string | null
+  >(null);
+
+  const [editing, setEditing] = useState<boolean>(false);
+  const [draftText, setDraftText] = useState<string>("");
+  const [copied, setCopied] = useState<boolean>(false);
+  const copyTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    async function loadMetadata() {
-      try {
-        const [skillsRes, patternsRes] = await Promise.all([
-          fetchSkills(),
-          fetchPatterns(),
-        ]);
-        setSkills(skillsRes.skills);
-        setPatterns(patternsRes.patterns);
-      } catch (err: unknown) {
-        console.error("Failed to load metadata:", err);
+    return () => {
+      if (copyTimerRef.current !== null) {
+        window.clearTimeout(copyTimerRef.current);
       }
-    }
-    loadMetadata();
+    };
   }, []);
 
-  const resetSessionState = () => {
-    setEdits(new Map());
-    setParagraphDrafts(new Map());
-    setShowCompare(false);
-    setShowRefiner(false);
-  };
+  const humanizing = phase === "humanizing";
+  const humanizeEnabled = capabilities.humanize === true;
+  const canSubmit =
+    !humanizing &&
+    text.trim().length > 0 &&
+    (!loaded || humanizeEnabled);
 
-  const handleLint = async (text: string, selectedSkills: string[]) => {
-    setCurrentText(text);
-    setOriginalTextBeforeLint(text);
-    resetSessionState();
-    setLoading(true);
+  const handleHumanize = async () => {
+    const submitted = text.trim();
+    if (!submitted) return;
+
+    setPhase("humanizing");
     setErrorMsg(null);
-    setLintResult(null);
+
     try {
-      const res = await lintText(text, selectedSkills);
-      setLintResult(res);
+      const res = await humanizeText(submitted);
+      setResult(res);
+      setOriginalText(submitted);
+      setCurrentText(res.rewrite);
+      setLastResultBeforeEdit(res.rewrite);
+      setDraftText(res.rewrite);
+      setEditing(false);
+      setCopied(false);
+      setPhase("review");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setErrorMsg(err.message);
       } else {
-        setErrorMsg("Đã xảy ra lỗi không xác định khi kiểm tra văn bản.");
+        setErrorMsg("Đã xảy ra lỗi không xác định khi humanize.");
       }
-      setLintResult(null);
-    } finally {
-      setLoading(false);
+      setPhase("idle");
     }
   };
 
-  const handleAcceptEdit = (edit: Edit) => {
-    // Bổ sung acceptedAt nếu chưa có
-    const acceptedEdit: Edit = {
-      ...edit,
-      acceptedAt: edit.acceptedAt ?? Date.now(),
-    };
-
-    setEdits((prev) => {
-      const next = new Map(prev);
-      next.set(acceptedEdit.issueKey, acceptedEdit);
-      return next;
-    });
-
-    // Cập nhật paragraphDrafts cho paragraph này
-    setParagraphDrafts((prev) => {
-      const next = new Map(prev);
-      next.set(acceptedEdit.paragraphStart, acceptedEdit.newParagraph);
-      return next;
-    });
-  };
-
-  const handleSkipEdit = (issueKey: string) => {
-    const issue = lintResult?.issues.find((i) => makeIssueKey(i) === issueKey);
-    if (!issue) return;
-    setEdits((prev) => {
-      const next = new Map(prev);
-      next.set(issueKey, {
-        issueKey,
-        issue,
-        originalParagraph: issue.paragraph,
-        newParagraph: issue.paragraph,
-        paragraphStart: issue.paragraph_start,
-        paragraphEnd: issue.paragraph_end,
-        status: "skipped",
-      });
-      return next;
-    });
-  };
-
-  const handleUndoEdit = (issueKey: string) => {
-    const edit = edits.get(issueKey);
-    if (!edit) return;
-
-    // Kiểm tra nếu là accepted: chỉ cho undo nếu là edit mới nhất trong paragraph
-    if (edit.status === "accepted") {
-      const acceptedInParagraph = Array.from(edits.values())
-        .filter(
-          (e) =>
-            e.paragraphStart === edit.paragraphStart &&
-            e.status === "accepted"
-        )
-        .sort((a, b) => (b.acceptedAt ?? 0) - (a.acceptedAt ?? 0));
-
-      if (
-        acceptedInParagraph.length > 0 &&
-        acceptedInParagraph[0].issueKey !== issueKey
-      ) {
-        // Không phải edit mới nhất → từ chối undo để tránh rollback phức tạp
-        return;
-      }
-    }
-
-    setEdits((prev) => {
-      const next = new Map(prev);
-      next.delete(issueKey);
-      return next;
-    });
-
-    // Nếu là accepted: cập nhật paragraphDrafts cho paragraph tương ứng
-    if (edit.status === "accepted") {
-      const remaining = Array.from(edits.values())
-        .filter(
-          (e) =>
-            e.paragraphStart === edit.paragraphStart &&
-            e.status === "accepted" &&
-            e.issueKey !== issueKey
-        )
-        .sort((a, b) => (b.acceptedAt ?? 0) - (a.acceptedAt ?? 0));
-
-      setParagraphDrafts((prev) => {
-        const next = new Map(prev);
-        if (remaining.length > 0) {
-          next.set(edit.paragraphStart, remaining[0].newParagraph);
-        } else {
-          next.delete(edit.paragraphStart);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(currentText).then(
+      () => {
+        setCopied(true);
+        if (copyTimerRef.current !== null) {
+          window.clearTimeout(copyTimerRef.current);
         }
-        return next;
-      });
-    }
+        copyTimerRef.current = window.setTimeout(() => setCopied(false), 2000);
+      },
+      () => {
+        // Clipboard có thể bị chặn — không hiển thị "Đã sao chép ✓".
+      }
+    );
   };
 
-  const acceptedEdits = useMemo(
-    () => Array.from(edits.values()).filter((e) => e.status === "accepted"),
-    [edits]
-  );
+  const handleStartEdit = () => {
+    setDraftText(currentText);
+    setEditing(true);
+  };
 
-  const acceptedParagraphCount = useMemo(() => {
-    const set = new Set<number>();
-    acceptedEdits.forEach((e) => set.add(e.paragraphStart));
-    return set.size;
-  }, [acceptedEdits]);
+  const handleSaveEdit = () => {
+    setLastResultBeforeEdit(currentText);
+    setCurrentText(draftText);
+    setEditing(false);
+  };
 
-  /**
-   * Văn bản đã áp dụng tất cả các accepted edits (mỗi paragraph chỉ lấy
-   * draft mới nhất từ paragraphDrafts, không cộng dồn giữa các edit).
-   */
-  const manuallyEditedText = useMemo(() => {
-    if (paragraphDrafts.size === 0) return currentText;
+  const handleUndo = () => {
+    if (lastResultBeforeEdit === null) return;
+    setCurrentText(lastResultBeforeEdit);
+    setEditing(false);
+    setLastResultBeforeEdit(null);
+  };
 
-    // Cần paragraphEnd cho mỗi paragraph → lấy từ bất kỳ edit nào cùng paragraph.
-    const entries: Array<{ start: number; end: number; text: string }> = [];
-    for (const [paraStart, draftText] of paragraphDrafts.entries()) {
-      const relatedEdit = Array.from(edits.values()).find(
-        (e) => e.paragraphStart === paraStart
-      );
-      if (!relatedEdit) continue;
-      entries.push({
-        start: paraStart,
-        end: relatedEdit.paragraphEnd,
-        text: draftText,
-      });
-    }
-
-    // Apply từ phải sang trái để offset không bị lệch
-    entries.sort((a, b) => b.start - a.start);
-
-    let result = currentText;
-    for (const entry of entries) {
-      if (
-        entry.start < 0 ||
-        entry.end > result.length ||
-        entry.start > entry.end
-      ) {
-        continue;
-      }
-      result =
-        result.slice(0, entry.start) + entry.text + result.slice(entry.end);
-    }
-    return result;
-  }, [currentText, paragraphDrafts, edits]);
-
-  const unprocessedIssueCount = useMemo(() => {
-    if (!lintResult) return 0;
-    let count = 0;
-    for (const issue of lintResult.issues) {
-      const key = makeIssueKey(issue);
-      if (!edits.has(key)) count += 1;
-    }
-    return count;
-  }, [lintResult, edits]);
-
-  const totalIssueCount = lintResult?.issues.length ?? 0;
-  const processedCount = totalIssueCount - unprocessedIssueCount;
-  const canProceedToRefiner =
-    totalIssueCount > 0 && unprocessedIssueCount === 0;
-
-  const handleRefinerComplete = async (refinedText: string) => {
-    // currentText = văn bản AI scan vừa xong, dùng làm văn bản gốc mới để lint lại
-    setCurrentText(refinedText);
-    setShowRefiner(false);
-    // Re-lint để hiển thị issues mới sau khi AI scan sửa
-    setLoading(true);
+  const resetToIdle = () => {
+    setPhase("idle");
+    setResult(null);
     setErrorMsg(null);
-    setLintResult(null);
-    setEdits(new Map());
-    setParagraphDrafts(new Map());
-    setShowCompare(false);
-    try {
-      const res = await lintText(refinedText, skills.map((s) => s.id));
-      setLintResult(res);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setErrorMsg(err.message);
-      } else {
-        setErrorMsg("Đã xảy ra lỗi không xác định khi kiểm tra văn bản.");
-      }
-      setLintResult(null);
-    } finally {
-      setLoading(false);
-    }
+    setEditing(false);
+    setCopied(false);
+    setLastResultBeforeEdit(null);
   };
+
+  const providerLabel =
+    result === null
+      ? ""
+      : result.provider === "humanizer-model"
+        ? "Mô hình chuyên biệt"
+        : "Groq (tạm thời)";
 
   return (
     <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          Humanize Text v1.3
+        </h1>
+        <p className="text-sm text-slate-600 mt-1">
+          Chuyển văn bản phong cách AI thành văn viết tự nhiên, giữ nguyên 100%
+          số liệu và ý.
+        </p>
+      </div>
+
       <Disclaimer />
 
-      <div className="grid grid-cols-1 gap-6">
-        <Editor skills={skills} onLint={handleLint} loading={loading} />
-
-        {errorMsg && (
-          <div className="bg-rose-50 border border-rose-200/80 text-rose-950 p-4 rounded-xl text-xs sm:text-sm flex items-start space-x-3 shadow-sm">
-            <div className="flex-shrink-0 w-6 h-6 text-rose-600 mt-0.5">
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="font-bold text-rose-950">Lỗi kiểm tra văn phong:</p>
-              <p className="mt-0.5 text-rose-800 leading-relaxed">{errorMsg}</p>
-            </div>
+      {loaded && !(capabilities.humanize === true) && (
+        <div className="bg-amber-50 border border-amber-200/80 text-amber-950 p-4 rounded-xl text-xs sm:text-sm shadow-sm flex items-start space-x-3">
+          <div className="flex-shrink-0 w-6 h-6 text-amber-600 mt-0.5">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+              />
+            </svg>
           </div>
-        )}
+          <p className="leading-relaxed">{DISABLED_BANNER}</p>
+        </div>
+      )}
 
-        {lintResult && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <IssueList
-              summary={lintResult.summary}
-              issues={lintResult.issues}
-              patterns={patterns}
-              edits={edits}
-              paragraphDrafts={paragraphDrafts}
-              onAcceptEdit={handleAcceptEdit}
-              onSkipEdit={handleSkipEdit}
-              onUndoEdit={handleUndoEdit}
-            />
+      {/* Ô nhập văn bản — luôn hiển thị để humanize lại với văn bản mới */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6 transition-all">
+        <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
+          <label
+            htmlFor="humanize-input"
+            className="block text-sm font-bold text-slate-800 tracking-tight flex items-center gap-2"
+          >
+            <svg className="w-4 h-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+            </svg>
+            <span>Văn bản AI cần humanize</span>
+          </label>
 
-            {totalIssueCount > 0 && (
-              <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="text-xs text-slate-600">
-                    <span className="font-bold text-slate-800">
-                      Tiến độ soát văn phong:
-                    </span>{" "}
-                    {processedCount} / {totalIssueCount} vấn đề đã xử lý
-                    {unprocessedIssueCount > 0 && (
-                      <span className="text-amber-700 ml-1">
-                        (còn {unprocessedIssueCount} chưa xử lý)
-                      </span>
-                    )}
-                  </div>
+          <div className="flex items-center space-x-3 text-xs">
+            {text.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setText("");
+                  resetToIdle();
+                }}
+                className="text-slate-400 hover:text-slate-600 font-medium transition-colors"
+              >
+                Xóa văn bản
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setText(SAMPLE_TEXT)}
+              className="inline-flex items-center space-x-1 text-sky-600 hover:text-sky-700 font-semibold transition-colors bg-sky-50 px-2.5 py-1 rounded-md border border-sky-100"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+              </svg>
+              <span>Thử văn bản mẫu</span>
+            </button>
+          </div>
+        </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowCompare((v) => !v)}
-                      className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all"
-                    >
-                      {showCompare ? "Ẩn so sánh" : "Xem so sánh"}
-                    </button>
+        <div className="relative group">
+          <textarea
+            id="humanize-input"
+            rows={8}
+            maxLength={API_LIMIT}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Dán văn bản AI cần làm mượt tại đây"
+            className="w-full p-4 border border-slate-200 rounded-xl shadow-inner text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 font-sans transition-all resize-y min-h-[160px]"
+          />
 
-                    <button
-                      type="button"
-                      onClick={() => setShowRefiner((v) => !v)}
-                      disabled={!canProceedToRefiner}
-                      title={
-                        !canProceedToRefiner
-                          ? `Còn ${unprocessedIssueCount} vấn đề chưa xử lý. Hãy xử lý hết trước khi dùng AI scan.`
-                          : "Bắt đầu giảm đạo văn AI trên văn bản đã soát"
-                      }
-                      className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    >
-                      {showRefiner
-                        ? "Ẩn phần giảm đạo văn AI"
-                        : "🔍 Giảm đạo văn AI (v1.2)"}
-                    </button>
-                  </div>
-                </div>
+          <div className="flex justify-between items-center text-xs text-slate-400 mt-1.5 px-1 font-mono">
+            <div className="flex items-center space-x-3">
+              <span>
+                Ký tự: <strong className="text-slate-600">{text.length.toLocaleString()}</strong> / 20.000
+              </span>
+              <span>
+                Từ: <strong className="text-slate-600">{countWords(text).toLocaleString()}</strong>
+              </span>
+            </div>
+            {text.length >= API_LIMIT && (
+              <span className="text-rose-500 font-semibold">Đã đạt giới hạn tối đa</span>
+            )}
+          </div>
+        </div>
 
-                {!canProceedToRefiner && unprocessedIssueCount > 0 && (
-                  <p className="text-[11px] text-amber-700 mt-2">
-                    💡 Hãy xử lý hết {unprocessedIssueCount} vấn đề ở trên
-                    (Chấp nhận hoặc Bỏ qua) trước khi chạy AI scan.
-                  </p>
+        <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-slate-100 mt-4">
+          {humanizing && (
+            <span className="text-xs text-sky-700 flex items-center gap-2 mr-auto">
+              <svg className="animate-spin h-4 w-4 text-sky-600" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Đang humanize... có thể mất khoảng 20 giây.
+            </span>
+          )}
+
+          <button
+            type="button"
+            onClick={handleHumanize}
+            disabled={!canSubmit}
+            className="px-7 py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm rounded-xl shadow-md shadow-sky-600/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.98] transition-all flex items-center space-x-2"
+          >
+            {humanizing ? (
+              <>
+                <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                <span>Đang humanize...</span>
+              </>
+            ) : (
+              <span>✨ Humanize văn bản</span>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {errorMsg && (
+        <div className="bg-rose-50 border border-rose-200/80 text-rose-950 p-4 rounded-xl text-xs sm:text-sm flex items-start space-x-3 shadow-sm">
+          <div className="flex-shrink-0 w-6 h-6 text-rose-600 mt-0.5">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+              />
+            </svg>
+          </div>
+          <div className="min-w-0">
+            <p className="font-bold text-rose-950">Lỗi khi humanize:</p>
+            <p className="mt-0.5 text-rose-800 leading-relaxed whitespace-pre-wrap break-words">
+              {errorMsg}
+            </p>
+            <button
+              type="button"
+              onClick={handleHumanize}
+              disabled={!canSubmit}
+              className="mt-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Thử lại
+            </button>
+          </div>
+        </div>
+      )}
+
+      {phase === "review" && result !== null && originalText && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          {/* Cảnh báo số liệu/giữ nguyên fact */}
+          {result.fact_check.lost_tokens.length > 0 && (
+            <div className="bg-amber-50 border border-amber-300/80 text-amber-950 p-4 rounded-xl text-xs sm:text-sm shadow-sm flex items-start space-x-3">
+              <div className="flex-shrink-0 w-6 h-6 text-amber-600 mt-0.5">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                  />
+                </svg>
+              </div>
+              <div className="min-w-0">
+                <p className="font-bold text-amber-950">
+                  Cảnh báo: số liệu/ngày còn thiếu trong bản đã humanize
+                </p>
+                <p className="mt-1 text-amber-900 leading-relaxed break-words">
+                  {result.fact_check.lost_tokens.join(", ")}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {result.warnings.length > 0 && (
+            <div className="bg-amber-50/60 border border-amber-200/80 text-amber-950 p-4 rounded-xl text-xs sm:text-sm shadow-sm">
+              <p className="font-bold text-amber-900 mb-1.5">
+                Ghi chú từ server:
+              </p>
+              <ul className="list-disc pl-4 space-y-1">
+                {result.warnings.map((w, idx) => (
+                  <li key={idx} className="text-amber-900 leading-relaxed">
+                    {w}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* So sánh trước / sau */}
+          <section className="space-y-3">
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+              Bản đã humanize
+            </h2>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 bg-white rounded-2xl border border-slate-200/80 p-3.5">
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="text-slate-400">Nguồn kết quả:</span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-semibold bg-sky-100 text-sky-900 border border-sky-200">
+                  {providerLabel}
+                </span>
+                {typeof result.stats?.latency_seconds === "number" && (
+                  <span className="text-slate-400 font-mono">
+                    {result.stats.latency_seconds.toLocaleString("vi-VN")} giây
+                  </span>
                 )}
+                {typeof result.stats?.attempts === "number" &&
+                  result.stats.attempts > 1 && (
+                    <span className="text-slate-400 font-mono">
+                      {result.stats.attempts} lần thử
+                    </span>
+                  )}
+                {typeof result.stats?.total_issues === "number" && (
+                  <span className="text-slate-400 font-mono">
+                    {result.stats.total_issues} vấn đề phát hiện
+                    {typeof result.stats.fixed === "number" && `, đã sửa ${result.stats.fixed}`}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {editing ? (
+                  <button
+                    type="button"
+                    onClick={handleSaveEdit}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all"
+                  >
+                    Lưu chỉnh sửa
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleStartEdit}
+                    className="px-4 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-sm transition-all"
+                  >
+                    Sửa thủ công
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleUndo}
+                  disabled={lastResultBeforeEdit === null}
+                  title={
+                    lastResultBeforeEdit === null
+                      ? "Không có gì để hoàn tác"
+                      : "Khôi phục giá trị trước đó"
+                  }
+                  className="px-4 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Hoàn tác
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all"
+                >
+                  {copied ? "Đã sao chép ✓" : "Sao chép"}
+                </button>
+              </div>
+            </div>
+
+            {editing && (
+              <div className="bg-white rounded-2xl border border-sky-200/80 p-3.5">
+                <label
+                  htmlFor="manual-edit-input"
+                  className="block text-xs font-bold text-slate-500 uppercase tracking-wider font-mono mb-2"
+                >
+                  Sửa trực tiếp bản đã humanize
+                </label>
+                <textarea
+                  id="manual-edit-input"
+                  rows={10}
+                  value={draftText}
+                  onChange={(e) => setDraftText(e.target.value)}
+                  className="w-full p-4 border border-slate-200 rounded-xl shadow-inner text-sm leading-relaxed text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 font-sans transition-all resize-y"
+                />
               </div>
             )}
 
-            {showCompare && acceptedParagraphCount > 0 && (
-              <CompareView
-                originalText={currentText}
-                edits={acceptedEdits}
-              />
-            )}
+            <CompareView originalText={originalText} currentText={currentText} />
+          </section>
 
-            {showRefiner && canProceedToRefiner && (
-              <ReportRefiner
-                key={manuallyEditedText}
-                originalText={manuallyEditedText}
-                originalTextBeforeAll={originalTextBeforeLint}
-                onComplete={handleRefinerComplete}
-              />
-            )}
-          </div>
-        )}
-      </div>
+          {/* Gợi ý rà soát */}
+          <section className="space-y-3">
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+              Gợi ý rà soát
+            </h2>
+            <SuggestionsPanel suggestions={result.suggestions} />
+          </section>
+        </div>
+      )}
     </div>
   );
 }

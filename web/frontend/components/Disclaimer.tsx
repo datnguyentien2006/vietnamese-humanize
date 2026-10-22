@@ -17,12 +17,16 @@ export const Disclaimer: React.FC = () => {
             </span>
           </h3>
           <p className="text-slate-600 mt-1 leading-relaxed">
-            Công cụ nhận diện các <strong>tín hiệu văn phong tiếng Việt</strong> giúp người viết tự kiểm tra và gọt giũa bài viết. Công cụ <strong>không</strong> đo xác suất AI, <strong>không</strong> suy đoán tác giả và <strong>không</strong> có tính năng lách kiểm duyệt. Mọi ghi nhận đều là gợi ý để tác giả tự chủ quyết định.
+            Công cụ Humanize chuyển văn bản có phong cách AI thành văn viết tự
+            nhiên mà vẫn giữ nguyên sự kiện, số liệu và ý của tác giả. Mỗi kết
+            quả chỉ là <strong>đề xuất</strong> để tác giả tự rà soát và quyết
+            định. Công cụ <strong>không</strong> đo xác suất AI,{" "}
+            <strong>không</strong> suy đoán tác giả và{" "}
+            <strong>không có tính năng lách kiểm duyệt</strong>.
           </p>
         </div>
       </div>
     </div>
   );
 };
-
 

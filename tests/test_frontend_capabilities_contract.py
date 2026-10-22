@@ -1,4 +1,4 @@
-"""Frontend optional features must follow the backend capability contract."""
+"""Frontend optional features must follow the backend capability contract (v1.3)."""
 
 from __future__ import annotations
 
@@ -18,26 +18,27 @@ def test_frontend_defines_and_fetches_the_health_capability_contract() -> None:
 
     assert "export interface HealthResponse" in types
     assert "capabilities:" in types
-    assert "rewrite: boolean" in types
+    assert "humanize: boolean" in types
     assert "contributions: boolean" in types
     assert "export async function fetchHealth()" in api
     assert "`${API_BASE}/api/health`" in api
     assert "handleResponse<HealthResponse>(res)" in api
+    # v1.3: the humanize API is the primary POST path.
+    assert "export async function humanizeText(text: string): Promise<HumanizeResponse>" in api
+    assert "`${API_BASE}/api/humanize`" in api
 
 
-def test_optional_frontend_features_fail_closed_without_blocking_lint() -> None:
+def test_optional_frontend_features_fail_closed_without_blocking_humanize() -> None:
     capability_nav = read_frontend("components/CapabilityNav.tsx")
     layout = read_frontend("app/layout.tsx")
     home = read_frontend("app/page.tsx")
     contribute = read_frontend("app/contribute/page.tsx")
-    issue_card = read_frontend("components/IssueCard.tsx")
-    report_refiner = read_frontend("components/ReportRefiner.tsx")
+    api = read_frontend("lib/api.ts")
 
     assert '"use client"' in capability_nav
-    assert "rewrite: false" in capability_nav
-    assert "contributions: false" in capability_nav
+    assert "{ humanize: false, contributions: false }" in capability_nav
     assert "fetchHealth()" in capability_nav
-    assert "health.capabilities.rewrite === true" in capability_nav
+    assert "health.capabilities.humanize === true" in capability_nav
     assert "health.capabilities.contributions === true" in capability_nav
     assert "capabilities.contributions &&" in capability_nav
 
@@ -45,24 +46,44 @@ def test_optional_frontend_features_fail_closed_without_blocking_lint() -> None:
     assert "<CapabilityNav />" in layout
     assert "<Analytics />" in layout
 
-    assert "lintText(text, selectedSkills)" in home
-    assert "RewritePanel" not in home
-    assert "ReportRefiner" in home
-    assert "scanReport" in read_frontend("lib/api.ts")
-    assert "refineSentence" in read_frontend("lib/api.ts")
+    # Fail-closed: banner + disabled submit while health says humanize is off.
+    assert (
+        "Chưa bật tính năng Humanize trên server. "
+        "Đặt HUMANIZER_API_BASE hoặc GROQ_API_KEY rồi thử lại." in home
+    )
+    assert "capabilities.humanize === true" in home
+    assert "Đang humanize... có thể mất khoảng 20 giây." in home
 
-    assert "useCapabilities()" in issue_card
-    assert "capabilities.rewrite === true" in issue_card
-    assert "suggestFix(" in issue_card
+    # The v1.2 lint-first flow is gone from the homepage and API client.
+    for forbidden in (
+        "ReportRefiner",
+        "RewritePanel",
+        "IssueCard",
+        "IssueList",
+        "scanReport",
+        "refineSentence",
+        "suggestFix(",
+        "rewriteText",
+        "Giảm đạo văn AI",
+    ):
+        assert forbidden not in home
+    for forbidden_api in (
+        "rewriteText(",
+        "suggestFix(",
+        "scanReport",
+        "refineSentence",
+        "fetchVocabulary(",
+        "fetchPatterns(",
+        "fetchSkills",
+    ):
+        assert forbidden_api not in api
 
-    assert "scanReport" in report_refiner
-    assert "refineSentence" in report_refiner
-    assert "userCommand" in report_refiner
-    assert "handleRefine" in report_refiner
-
+    # The untouched contribute page keeps its own capability gate and
+    # imports fetchSkills from the dedicated contribute API module.
     assert "const capabilities = useCapabilities()" in contribute
     assert "if (!capabilities.contributions)" in contribute
     assert "<ContributeForm skills={skills} />" in contribute
+    assert 'fetchSkills } from "../../lib/contributeApi"' in contribute
 
 
 def test_frontend_keeps_analytics_root_only_without_custom_events() -> None:
