@@ -63,6 +63,7 @@ if not os.path.isdir("vietnamese-humanize/.git"):
 
 !pip install -q -r training/requirements.txt
 !pip install -q huggingface_hub
+!pip install -q autoawq   # bắt buộc cho --export-awq (merge_and_export import awq)
 print("setup ok")""",
     ),
     cell(
@@ -165,11 +166,23 @@ if RUN_AWQ_EXPORT:
 base = TRAINED_MODEL or TRAIN_MODEL
 if base:
     merge_cmd += ["--model", base]
-merge_cmd += ["--merge-device", "auto"]
+# Ghi merged fp16 ra /tmp: /kaggle/working có hạn 20 GB, còn merged 7B (~15 GB)
+# + AWQ (~4,5 GB) sẽ sát trần; /tmp không tính vào output.
+merge_cmd += ["--merge-device", "auto", "--merged-dir", "/tmp/humanizer-merged"]
 print("RUN:", *merge_cmd)
 proc = subprocess.run(merge_cmd)
 if proc.returncode != 0:
-    raise RuntimeError(f"merge/export failed with exit code {proc.returncode}")
+    # Adapter là artifact không thể tái tạo — KHÔNG raise để còn giữ nó.
+    print("[warn] merge/AWQ lỗi — adapter vẫn được giữ ở training/output/humanizer-lora")
+    print("[warn] có thể quantize lại sau bằng merge_and_export.py")
+shutil.rmtree("/tmp/humanizer-merged", ignore_errors=True)
+for _kind in ("lora", "awq"):
+    _path = f"training/output/humanizer-{_kind}"
+    if os.path.isdir(_path):
+        _size = sum(
+            os.path.getsize(os.path.join(r, f)) for r, _, fs in os.walk(_path) for f in fs
+        )
+        print(f"{_kind}: {_size / 1e9:.2f} GB -> {_path}")
 
 # Persist adapter + AWQ. The full fp16 merged model is skipped on purpose:
 # it is ~15 GB, regenerable from adapter+base in minutes, and would blow the
