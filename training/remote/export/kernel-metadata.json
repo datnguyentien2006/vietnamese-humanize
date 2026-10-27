@@ -1,0 +1,17 @@
+{
+  "id": "mytham/humanizer-vi-export",
+  "title": "humanizer-vi-export",
+  "code_file": "export_gguf.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "kernel_sources": [
+    "mytham/humanizer-vi-train"
+  ],
+  "competition_sources": [],
+  "model_sources": []
+}
