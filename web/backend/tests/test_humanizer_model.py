@@ -81,7 +81,11 @@ def test_happy_path_single_call_messages_and_headers(monkeypatch):
     assert payload["model"] == settings.HUMANIZER_MODEL
     assert payload["temperature"] == 0.5
     assert payload["messages"][0] == {"role": "system", "content": SYSTEM_PROMPT}
-    assert payload["messages"][1] == {"role": "user", "content": build_user_prompt(SAMPLE)}
+    # Phase 0: user prompt = template frozen + câu nhắc chống nén/chèn tiêu đề.
+    user_content = payload["messages"][1]["content"]
+    assert payload["messages"][1]["role"] == "user"
+    assert user_content.startswith(build_user_prompt(SAMPLE))
+    assert "không đặt tiêu đề" in user_content
     headers = post.call_args.kwargs["headers"]
     assert headers["Authorization"] == "Bearer hk-secret"
 
