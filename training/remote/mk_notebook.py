@@ -202,7 +202,14 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
                 "colab": {"provenance": []},
                 "accelerator": "GPU",
                 "kaggle": {"accelerator": "nvidiaTeslaT4"},
-                "language_info": {"name": "python"},
+                # kernelspec BẮT BUỘC: Kaggle chạy notebook bằng papermill và sẽ
+                # báo "No kernel name found in notebook" nếu thiếu khối này.
+                "kernelspec": {
+                    "display_name": "Python 3",
+                    "language": "python",
+                    "name": "python3",
+                },
+                "language_info": {"name": "python", "version": "3.11"},
             },
             "cells": cells,
         },
@@ -212,26 +219,40 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
     encoding="utf-8",
 )
 
-(OUT_DIR / "kernel-metadata.json").write_text(
-    json.dumps(
-        {
-            "id": "PUT_YOUR_KAGGLE_USERNAME/humanizer-vi-train",
-            "code_file": "humanizer_colab.ipynb",
-            "language_type": "notebook",
-            "id_is_slug": False,
-            "is_private": True,
-            "enable_gpu": True,
-            "enable_tpu": False,
-            "enable_internet": True,
-            "dataset_sources": [],
-            "kernel_sources": [],
-            "competition_sources": [],
-            "model_sources": [],
-        },
-        indent=2,
-    ),
-    encoding="utf-8",
-)
+# kernel-metadata.json: GIỮ NGUYÊN id + dataset_sources người dùng đã điền.
+# (Trước đây generator ghi đè thành placeholder → mất cấu hình mỗi lần regenerate.)
+_meta_path = OUT_DIR / "kernel-metadata.json"
+_meta = {
+    "id": "PUT_YOUR_KAGGLE_USERNAME/humanizer-vi-train",
+    "title": "humanizer-vi-train",
+    "code_file": "humanizer_colab.ipynb",
+    "language": "python",
+    "kernel_type": "notebook",
+    "is_private": True,
+    "enable_gpu": True,
+    "enable_tpu": False,
+    "enable_internet": True,
+    "dataset_sources": [],
+    "kernel_sources": [],
+    "competition_sources": [],
+    "model_sources": [],
+}
+if _meta_path.is_file():
+    try:
+        _old = json.loads(_meta_path.read_text(encoding="utf-8-sig"))
+    except (OSError, json.JSONDecodeError):
+        _old = {}
+    for key in ("id", "title", "dataset_sources", "kernel_sources", "competition_sources", "model_sources"):
+        value = _old.get(key)
+        if key == "id":
+            if isinstance(value, str) and "PUT_YOUR" not in value:
+                _meta["id"] = value
+        elif value:
+            _meta[key] = value
+    for flag in ("is_private", "enable_gpu", "enable_internet"):
+        if flag in _old:
+            _meta[flag] = _old[flag]
+_meta_path.write_text(json.dumps(_meta, indent=2), encoding="utf-8")
 
 print("wrote:", (OUT_DIR / "humanizer_colab.ipynb").as_posix())
 print("wrote:", (OUT_DIR / "kernel-metadata.json").as_posix())
