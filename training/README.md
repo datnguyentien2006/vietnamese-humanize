@@ -15,18 +15,26 @@ existing Groq web app stays live while this pipeline is under construction.
 
 Two-phase training on a Qwen2.5-14B-Instruct base (4-bit QLoRA):
 
-1. **Phase 1 — style SFT (continuation mode).** Feed human-written Vietnamese
-   text through chat templates where the *assistant responses are real human
-   prose* (`prepare_dataset.py --mode continuation`, the default). The model
-   adjusts its response distribution toward natural human style. This is
-   weakly supervised on style: the input/output adjacency does not have to be
-   a rewrite.
-2. **Phase 2 — task SFT (pairs mode).** Assemble curated rewrite pairs from
-   your own work — manual edits from the current app's review workflow,
-   v1.2/v1.3 accepted suggestions, and your earlier Groq-pipeline fixes —
-   saved as `training/data/pairs/humanized_pairs.jsonl`, one
-   `{"input": ..., "output": ...}` per line. These teach the actual
-   "rewrite this text, keep the facts" mapping the API will serve.
+1. **Phase 1 — task SFT (synthesize mode, the default).** Build
+   `(AI-flavoured input, human target)` pairs: take human-written prose and
+   "dirty" it into AI-flavoured Vietnamese by injecting the project's own
+   catalog tells (generic connectors, template openers, hollow evaluative
+   tails). Dirtying only inserts phrases without digits, so both sides carry
+   the same fact tokens; every candidate is re-verified mechanically before it
+   is written to disk. This is the only mode that teaches the actual
+   "rewrite this text, keep the numbers" mapping, because the prompt and the
+   target describe the same content.
+2. **Phase 2 — curated pairs (pairs mode).** Assemble rewrite pairs from your
+   own work — manual edits from the current app's review workflow, accepted
+   suggestions, and earlier pipeline fixes — saved as
+   `training/data/pairs/humanized_pairs.jsonl`, one
+   `{"input": ..., "output": ...}` per line.
+
+`--mode continuation` still exists as a style-prior experiment, but it is no
+longer the default and it does **not** teach the rewrite task: it pairs a
+"rewrite this" prompt with the *next* chunk as the target, so the model learns
+to ignore the input — which is exactly what breaks fact preservation at
+inference time.
 
 Base model choice:
 
@@ -60,6 +68,18 @@ Rules:
 - Wikipedia dumps are fine for punctuation/grammar but their style is
   encyclopedic; balance them with essays, blogs, and narrative prose.
 
+## Before you train: `doctor.py`
+
+```bash
+python training/doctor.py
+```
+
+It prints the Python/package state, **which provider `/api/humanize` would
+actually answer today** (mirroring `app.capabilities.humanize_enabled`), the
+dataset row counts and manifest summary, and which training-only dependencies
+are missing. If it reports `groq-fallback`, every result you are reviewing came
+from Groq — not from a local model.
+
 ## How to run (Colab free / Kaggle T4)
 
 1. Put human text files into `training/data/raw/` (`.txt`, `.txt.gz`,
@@ -72,9 +92,20 @@ Rules:
 2. Clone the repo, then:
    ```bash
    pip install -r training/requirements.txt
-   python training/prepare_dataset.py --source training/data/raw --limit 20000
+   python training/fetch_corpus.py --max-pages 800   # nếu chưa có corpus (xem CORPUS.md)
+   python training/prepare_dataset.py --mode synthesize --source training/data/raw --limit 20000
    python training/train_qlora.py
    ```
+   `--mode synthesize` writes `training/data/sft/{train,val}.jsonl` plus a
+   `manifest.json` (pair counts, register mix, rejection reasons, mean surface
+   overlap). Splits are made **per source document**, so chunks of one document
+   never straddle train/val.
+
+   `synthesize.dirtying: llm` uses a teacher endpoint instead of the rule
+   engine and needs `TEACHER_API_BASE`, `TEACHER_MODEL`, `TEACHER_API_KEY`
+   (or `GROQ_API_KEY`). Candidates that drop or add a number/date are rejected
+   by the same guard, so a weak teacher lowers yield instead of poisoning the
+   dataset.
 3. If VRAM runs out (`CUDA out of memory`), rerun with:
    ```bash
    python training/train_qlora.py --model Qwen/Qwen2.5-7B-Instruct
@@ -125,7 +156,11 @@ and data regression — rather than chasing AI-detector score targets.
 training/
   config.yaml          hyperparams, model ids, dataset paths
   task_prompts.py      the ONE prompt template used for training + serving
-  prepare_dataset.py   raw human text -> SFT JSONL (continuation / pairs modes)
+  prepare_dataset.py   raw human text -> SFT JSONL (synthesize / pairs / continuation)
+  pair_synthesis.py    dirtying engine + fact-token guard for synthesize pairs
+  fetch_corpus.py      collect PD/CC Vietnamese prose from Wikisource (provenance kept)
+  CORPUS.md            nguồn dữ liệu, license, tỉ lệ trộn, cách kiểm tra nhiễm
+  doctor.py            readiness: live provider, dataset state, missing deps
   train_qlora.py       4-bit QLoRA fine-tune (TRL + PEFT + bitsandbytes)
   merge_and_export.py  merge LoRA into base; optional AWQ export for vLLM
   serve/runpod_vllm.md self-hosting guide + future backend contract

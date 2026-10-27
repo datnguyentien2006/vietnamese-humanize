@@ -45,7 +45,8 @@ REPO_URL = "{REPO_URL}"
 DATA_RAW = None            # Colab: r"/content/drive/MyDrive/vietnamese-humanize/data-raw" (a folder of .txt/.txt.gz/.jsonl/.parquet corpora)
                            # Kaggle: leave None and attach ONE dataset with the text corpus — auto-detected
 PERSIST_DIR = None         # Colab: r"/content/drive/MyDrive/vietnamese-humanize/out" ; on Kaggle outputs are kept automatically (kernel output)
-TRAIN_MODEL = None         # None -> use training/config.yaml (14B base). Set 'Qwen/Qwen2.5-7B-Instruct' to force fallback.
+TRAIN_MODEL = "Qwen/Qwen2.5-7B-Instruct"  # 7B: train nhanh gấp đôi, AWQ ~4,5 GB serve được trên GPU 6 GB của máy local.
+                           # Đổi thành None để dùng 14B (config.yaml) — chỉ nên chọn khi có GPU ≥16 GB để serve.
 LIMIT = None               # None -> all corpus docs; e.g. 20000 for a quick dry run
 RUN_AWQ_EXPORT = True""",
     ),
@@ -86,20 +87,38 @@ def use_corpus_from(source: str) -> None:
 
 kaggle_inputs = sorted(glob.glob("/kaggle/input/*"))
 if kaggle_inputs:
-    use_corpus_from(kaggle_inputs[0])            # one dataset = the corpus
+    corpus_root = kaggle_inputs[0]            # one dataset = the corpus
+    use_corpus_from(corpus_root)
 elif DATA_RAW:
-    use_corpus_from(DATA_RAW)
+    corpus_root = DATA_RAW
+    use_corpus_from(corpus_root)
 else:
     from google.colab import drive
     drive.mount("/content/drive")
-    use_corpus_from(input("Thư mục corpus (người viết) trong Drive: "))
+    corpus_root = input("Thư mục corpus (người viết) trong Drive: ")
+    use_corpus_from(corpus_root)
+
+# Prebuilt SFT (train/val.jsonl) nằm cùng dataset → copy sang sft/ để cell 3 bỏ qua build
+sft_hits = glob.glob(corpus_root + "/**/train.jsonl", recursive=True) + glob.glob(
+    corpus_root + "/**/val.jsonl", recursive=True
+)
+if sft_hits:
+    os.makedirs("training/data/sft", exist_ok=True)
+    for sft_file in sft_hits:
+        shutil.copy(sft_file, "training/data/sft/")
+    print("prebuilt SFT copied:", [os.path.basename(f) for f in sft_hits])
 print("corpus ok")""",
     ),
     cell(
         "code",
-        """# ==== 3. Build SFT dataset ====
-limit_arg = "" if LIMIT is None else f"--limit {LIMIT}"
-!python training/prepare_dataset.py {limit_arg}
+        """# ==== 3. Build SFT dataset (bỏ qua nếu đã có bản dựng sẵn) ====
+import os
+
+if os.path.isfile("training/data/sft/train.jsonl"):
+    print("PREBUILT SFT FOUND — dùng train/val đã upload, bỏ qua prepare_dataset")
+else:
+    limit_arg = "" if LIMIT is None else f"--limit {LIMIT}"
+    !python training/prepare_dataset.py {limit_arg}
 with open("training/data/sft/train.jsonl", encoding="utf-8") as fh:
     print(fh.read(700))""",
     ),

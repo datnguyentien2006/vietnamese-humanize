@@ -16,12 +16,30 @@ dataset:
   # Accepted shapes: .txt, .txt.gz, .parquet (text_column), .jsonl (text_column).
   source_paths: ["training/data/raw"]
   text_column: text
-  mode: continuation      # continuation (style SFT) | pairs (curated rewrite pairs)
+  mode: synthesize        # synthesize (task-correct) | pairs (curated) | continuation (style only)
   pairs_file: training/data/pairs/humanized_pairs.jsonl
   min_words: 30           # drop samples below this length
   max_words: 400          # split longer documents into paragraph chunks
-  train_ratio: 0.95       # remainder becomes the validation split
+  train_ratio: 0.9        # remainder becomes the validation split (whole documents)
   dedupe: true            # near-duplicate removal on normalized text
+
+# --- synthesize mode: build (AI-flavoured -> human) pairs from human text -----
+# Why: continuation mode trains "write the next chunk", not "rewrite this text",
+# so the model never sees an AI-flavoured input and learns to ignore the source.
+# synthesize dirtying guarantees both sides carry the same fact tokens.
+synthesize:
+  dirtying: rule          # rule (offline, deterministic) | llm (teacher endpoint)
+  register: null          # override the inferred register label for the whole corpus
+  max_gold_errors_per_100_words: 1.0   # chỉ loại gold khi có lỗi chắc chắn (error), tính theo mật độ
+  min_ai_hits: 1          # dirtying must actually produce >=1 lint finding
+  length_ratio: [0.85, 1.45]   # len(A)/len(H) window
+  per_doc_max_pairs: 3    # cap chunks per source document (keeps one doc from dominating)
+  teacher_severities: ["L2", "L2", "L2", "L3"]   # chu kỳ mức độ "AI" khi dirtying=llm (L3 dễ bị loại vì phình — chấp nhận)
+  include_rule_pairs: true # khi dirtying=llm: mỗi chunk kèm 1 biến thể rule (L1) — đa dạng generator
+  llm_max_5gram_overlap: 0.65  # gate chống vẹt, chỉ áp cho input do teacher sinh
+  llm_max_lcs: 0.75           # (rule dirtying là insert-only nên bỏ qua 2 gate này);
+                              # judge gate (qc_judge.py) mới là rào chất lượng cuối
+  teacher_cache: true     # cache call teacher theo (severity, text) — rerun/crash không tốn call
 
 lora:
   r: 16
