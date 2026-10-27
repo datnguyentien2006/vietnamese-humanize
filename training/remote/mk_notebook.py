@@ -87,6 +87,10 @@ def use_corpus_from(source: str) -> None:
 
 
 kaggle_inputs = sorted(glob.glob("/kaggle/input/*"))
+# Kaggle mới mount dataset tại /kaggle/input/datasets/{owner}/{slug} —
+# glob một cấp sẽ chỉ trả về '.../datasets'. Mở thêm một cấp khi gặp.
+if len(kaggle_inputs) == 1 and kaggle_inputs[0].rstrip("/").endswith("/datasets"):
+    kaggle_inputs = sorted(glob.glob("/kaggle/input/datasets/*/*"))
 if kaggle_inputs:
     corpus_root = kaggle_inputs[0]            # one dataset = the corpus
     use_corpus_from(corpus_root)
