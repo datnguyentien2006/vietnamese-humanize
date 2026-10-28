@@ -4,14 +4,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== Design tokens (sáng/tối) ===== */
 :root {
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+
+  /* Màu bề mặt dạng kênh RGB để dùng với alpha-value của Tailwind */
+  --c-page: 248 250 252;   /* slate-50 */
+  --c-card: 255 255 255;
+  --c-soft: 241 245 249;   /* slate-100 */
+  --c-line: 226 232 240;   /* slate-200 */
+  --c-ink: 15 23 42;       /* slate-900 */
+  --c-muted: 100 116 139;  /* slate-500 */
+}
+
+.dark {
+  --c-page: 2 6 23;        /* slate-950 */
+  --c-card: 15 23 42;      /* slate-900 */
+  --c-soft: 30 41 59;      /* slate-800 */
+  --c-line: 51 65 85;      /* slate-700 */
+  --c-ink: 226 232 240;    /* slate-200 */
+  --c-muted: 148 163 184;  /* slate-400 */
+}
+
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
 }
 
 body {
-  color: #0f172a;
-  background-color: #f8fafc;
+  color: rgb(var(--c-ink));
+  background-color: rgb(var(--c-page));
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -20,6 +45,10 @@ body {
 ::selection {
   background-color: #e0f2fe;
   color: #0369a1;
+}
+.dark ::selection {
+  background-color: #0c4a6e;
+  color: #e0f2fe;
 }
 
 /* Custom scrollbar for textareas & code windows */
@@ -37,4 +66,30 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
 
+@layer utilities {
+  /* Chữ gradient nhấn cho tiêu đề hero / nhãn quan trọng */
+  .text-gradient {
+    @apply bg-gradient-to-r from-sky-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent;
+  }
+  .dark .text-gradient {
+    @apply from-sky-400 via-sky-300 to-emerald-400;
+  }
+
+  /* Bề mặt kính mờ cho header / toolbar */
+  .glass {
+    @apply backdrop-blur-md border border-line;
+    background-color: rgb(var(--c-card) / 0.8);
+  }
+
+  /* Thanh kẻ nhấn phía trên các section tiêu đề */
+  .accent-bar {
+    @apply inline-block h-1 w-6 rounded-full bg-gradient-to-r from-sky-500 to-emerald-500 align-middle;
+  }
+}

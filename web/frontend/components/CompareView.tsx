@@ -138,12 +138,12 @@ export const CompareView: React.FC<CompareViewProps> = ({
   const changedCount = currentSegments.filter((s) => s.changed).length;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6 mb-8">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-slate-100">
+    <div className="bg-card rounded-2xl shadow-card border border-line p-5 sm:p-6 mb-8 transition-colors">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-line">
         <div>
-          <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h3 className="text-base sm:text-lg font-bold text-ink tracking-tight flex items-center gap-2">
             <svg
-              className="w-5 h-5 text-emerald-600"
+              className="w-5 h-5 text-emerald-600 dark:text-emerald-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -157,25 +157,37 @@ export const CompareView: React.FC<CompareViewProps> = ({
             </svg>
             <span>So sánh trước và sau khi humanize</span>
           </h3>
-          <p className="text-xs text-slate-500 mt-1 font-mono">
+          <p className="text-xs text-muted mt-1 font-mono">
             {changedCount} chỗ đã đổi • Ký tự:{" "}
             {formatDelta(charDelta, "kt")} • Từ:{" "}
             {formatDelta(wordDelta, "từ")}
           </p>
         </div>
+
+        {/* Legend màu diff */}
+        <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold text-muted">
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className="h-3 w-3 rounded-sm bg-rose-200 dark:bg-rose-900/70 border border-rose-300 dark:border-rose-800" />
+            Đã thay đổi ở bản gốc
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className="h-3 w-3 rounded-sm bg-yellow-200 dark:bg-yellow-700/70 border border-yellow-300 dark:border-yellow-800" />
+            Mới trong bản humanize
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="p-4 bg-slate-50/70 rounded-xl border border-slate-200/80">
-          <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">
+        <div className="p-4 bg-soft rounded-xl border border-line transition-colors">
+          <span className="block text-xs font-bold text-muted uppercase tracking-wider mb-2 font-mono">
             Văn bản gốc
           </span>
-          <p className="whitespace-pre-wrap text-xs sm:text-sm text-slate-800 leading-relaxed">
+          <p className="whitespace-pre-wrap text-xs sm:text-sm text-ink leading-relaxed">
             {originalSegments.map((s, idx) =>
               s.changed ? (
                 <span
                   key={idx}
-                  className="bg-rose-100 text-slate-700 rounded-sm px-0.5"
+                  className="bg-rose-100 dark:bg-rose-900/50 text-rose-950 dark:text-rose-100 rounded-sm px-0.5 decoration-rose-300 line-through decoration-2"
                 >
                   {s.text}
                 </span>
@@ -185,16 +197,16 @@ export const CompareView: React.FC<CompareViewProps> = ({
             )}
           </p>
         </div>
-        <div className="p-4 bg-emerald-50/60 rounded-xl border border-emerald-200/80">
-          <span className="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2 font-mono">
+        <div className="p-4 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl border border-emerald-200/80 dark:border-emerald-800/60 transition-colors">
+          <span className="block text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider mb-2 font-mono">
             Văn bản đã humanize
           </span>
-          <p className="whitespace-pre-wrap text-xs sm:text-sm text-emerald-950 leading-relaxed">
+          <p className="whitespace-pre-wrap text-xs sm:text-sm text-emerald-950 dark:text-emerald-100 leading-relaxed">
             {currentSegments.map((s, idx) =>
               s.changed ? (
                 <mark
                   key={idx}
-                  className="bg-yellow-200 text-yellow-950 rounded-sm px-0.5"
+                  className="bg-yellow-200 dark:bg-yellow-600/60 text-yellow-950 dark:text-yellow-50 rounded-sm px-0.5"
                 >
                   {s.text}
                 </mark>

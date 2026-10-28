@@ -137,11 +137,18 @@ export default function HomePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          Humanize Text v1.3
-        </h1>
-        <p className="text-sm text-slate-600 mt-1">
+      {/* ===== Hero ===== */}
+      <div className="animate-fade-up">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">
+            Humanize Text v1.3
+          </h1>
+          <span
+            aria-hidden="true"
+            className="hidden sm:inline-block accent-bar"
+          />
+        </div>
+        <p className="text-sm text-muted mt-1.5 max-w-2xl leading-relaxed">
           Chuyển văn bản phong cách AI thành văn viết tự nhiên, giữ nguyên 100%
           số liệu và ý.
         </p>
@@ -150,8 +157,8 @@ export default function HomePage() {
       <Disclaimer />
 
       {loaded && !(capabilities.humanize === true) && (
-        <div className="bg-amber-50 border border-amber-200/80 text-amber-950 p-4 rounded-xl text-xs sm:text-sm shadow-sm flex items-start space-x-3">
-          <div className="flex-shrink-0 w-6 h-6 text-amber-600 mt-0.5">
+        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-amber-950 dark:text-amber-100 p-4 rounded-xl text-xs sm:text-sm shadow-card flex items-start space-x-3 animate-fade-up">
+          <div className="flex-shrink-0 w-6 h-6 text-amber-600 dark:text-amber-400 mt-0.5">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path
                 strokeLinecap="round"
@@ -165,13 +172,13 @@ export default function HomePage() {
       )}
 
       {/* Ô nhập văn bản — luôn hiển thị để humanize lại với văn bản mới */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6 transition-all">
+      <div className="bg-card rounded-2xl shadow-card border border-line p-5 sm:p-6 transition-colors">
         <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
           <label
             htmlFor="humanize-input"
-            className="block text-sm font-bold text-slate-800 tracking-tight flex items-center gap-2"
+            className="block text-sm font-bold text-ink tracking-tight flex items-center gap-2"
           >
-            <svg className="w-4 h-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-4 h-4 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
             </svg>
             <span>Văn bản AI cần humanize</span>
@@ -185,7 +192,7 @@ export default function HomePage() {
                   setText("");
                   resetToIdle();
                 }}
-                className="text-slate-400 hover:text-slate-600 font-medium transition-colors"
+                className="text-muted hover:text-rose-600 dark:hover:text-rose-400 font-medium transition-colors"
               >
                 Xóa văn bản
               </button>
@@ -193,7 +200,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setText(SAMPLE_TEXT)}
-              className="inline-flex items-center space-x-1 text-sky-600 hover:text-sky-700 font-semibold transition-colors bg-sky-50 px-2.5 py-1 rounded-md border border-sky-100"
+              className="inline-flex items-center space-x-1 text-sky-700 dark:text-sky-300 hover:text-sky-800 dark:hover:text-sky-200 font-semibold transition-colors bg-sky-50 dark:bg-sky-950/50 px-2.5 py-1 rounded-md border border-sky-100 dark:border-sky-900 hover:border-sky-300 dark:hover:border-sky-700"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -211,28 +218,32 @@ export default function HomePage() {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Dán văn bản AI cần làm mượt tại đây"
-            className="w-full p-4 border border-slate-200 rounded-xl shadow-inner text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 font-sans transition-all resize-y min-h-[160px]"
+            className="w-full p-4 bg-soft border border-line rounded-xl text-sm leading-relaxed text-ink placeholder:text-muted/80 focus:outline-none focus:ring-2 focus:ring-sky-500/30 dark:focus:ring-sky-400/30 focus:border-sky-500 dark:focus:border-sky-400 font-sans transition-all resize-y min-h-[160px] shadow-inner"
           />
 
-          <div className="flex justify-between items-center text-xs text-slate-400 mt-1.5 px-1 font-mono">
+          <div className="flex justify-between items-center text-xs text-muted mt-1.5 px-1 font-mono">
             <div className="flex items-center space-x-3">
-              <span>
-                Ký tự: <strong className="text-slate-600">{text.length.toLocaleString()}</strong> / 20.000
+              <span className="inline-flex items-center gap-1">
+                Ký tự:{" "}
+                <strong className="text-ink">{text.length.toLocaleString()}</strong>
+                <span className="text-muted/70">/ 20.000</span>
               </span>
-              <span>
-                Từ: <strong className="text-slate-600">{countWords(text).toLocaleString()}</strong>
+              <span className="inline-flex items-center gap-1">
+                Từ: <strong className="text-ink">{countWords(text).toLocaleString()}</strong>
               </span>
             </div>
             {text.length >= API_LIMIT && (
-              <span className="text-rose-500 font-semibold">Đã đạt giới hạn tối đa</span>
+              <span className="text-rose-600 dark:text-rose-400 font-semibold animate-pulse-soft">
+                Đã đạt giới hạn tối đa
+              </span>
             )}
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-slate-100 mt-4">
+        <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-line mt-4">
           {humanizing && (
-            <span className="text-xs text-sky-700 flex items-center gap-2 mr-auto">
-              <svg className="animate-spin h-4 w-4 text-sky-600" fill="none" viewBox="0 0 24 24">
+            <span className="text-xs text-sky-700 dark:text-sky-300 flex items-center gap-2 mr-auto animate-fade-in">
+              <svg className="animate-spin h-4 w-4 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
@@ -244,7 +255,7 @@ export default function HomePage() {
             type="button"
             onClick={handleHumanize}
             disabled={!canSubmit}
-            className="px-7 py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm rounded-xl shadow-md shadow-sky-600/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.98] transition-all flex items-center space-x-2"
+            className="px-7 py-3 bg-gradient-to-r from-sky-600 to-sky-500 hover:from-sky-500 hover:to-emerald-500 text-white font-bold text-sm rounded-xl shadow-glow disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none dark:disabled:opacity-40 active:scale-[0.98] transition-all flex items-center space-x-2"
           >
             {humanizing ? (
               <>
@@ -262,8 +273,8 @@ export default function HomePage() {
       </div>
 
       {errorMsg && (
-        <div className="bg-rose-50 border border-rose-200/80 text-rose-950 p-4 rounded-xl text-xs sm:text-sm flex items-start space-x-3 shadow-sm">
-          <div className="flex-shrink-0 w-6 h-6 text-rose-600 mt-0.5">
+        <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/60 text-rose-950 dark:text-rose-100 p-4 rounded-xl text-xs sm:text-sm flex items-start space-x-3 shadow-card animate-fade-up">
+          <div className="flex-shrink-0 w-6 h-6 text-rose-600 dark:text-rose-400 mt-0.5">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path
                 strokeLinecap="round"
@@ -273,15 +284,15 @@ export default function HomePage() {
             </svg>
           </div>
           <div className="min-w-0">
-            <p className="font-bold text-rose-950">Lỗi khi humanize:</p>
-            <p className="mt-0.5 text-rose-800 leading-relaxed whitespace-pre-wrap break-words">
+            <p className="font-bold text-rose-950 dark:text-rose-100">Lỗi khi humanize:</p>
+            <p className="mt-0.5 text-rose-800 dark:text-rose-200 leading-relaxed whitespace-pre-wrap break-words">
               {errorMsg}
             </p>
             <button
               type="button"
               onClick={handleHumanize}
               disabled={!canSubmit}
-              className="mt-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-glow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
             >
               Thử lại
             </button>
@@ -290,11 +301,11 @@ export default function HomePage() {
       )}
 
       {phase === "review" && result !== null && originalText && (
-        <div className="space-y-6 animate-in fade-in duration-300">
+        <div className="space-y-6 animate-fade-up">
           {/* Cảnh báo số liệu/giữ nguyên fact */}
           {result.fact_check.lost_tokens.length > 0 && (
-            <div className="bg-amber-50 border border-amber-300/80 text-amber-950 p-4 rounded-xl text-xs sm:text-sm shadow-sm flex items-start space-x-3">
-              <div className="flex-shrink-0 w-6 h-6 text-amber-600 mt-0.5">
+            <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-700/60 text-amber-950 dark:text-amber-100 p-4 rounded-xl text-xs sm:text-sm shadow-card flex items-start space-x-3">
+              <div className="flex-shrink-0 w-6 h-6 text-amber-600 dark:text-amber-400 mt-0.5">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path
                     strokeLinecap="round"
@@ -304,10 +315,10 @@ export default function HomePage() {
                 </svg>
               </div>
               <div className="min-w-0">
-                <p className="font-bold text-amber-950">
+                <p className="font-bold text-amber-950 dark:text-amber-100">
                   Cảnh báo: số liệu/ngày còn thiếu trong bản đã humanize
                 </p>
-                <p className="mt-1 text-amber-900 leading-relaxed break-words">
+                <p className="mt-1 text-amber-900 dark:text-amber-200 leading-relaxed break-words">
                   {result.fact_check.lost_tokens.join(", ")}
                 </p>
               </div>
@@ -315,13 +326,13 @@ export default function HomePage() {
           )}
 
           {result.warnings.length > 0 && (
-            <div className="bg-amber-50/60 border border-amber-200/80 text-amber-950 p-4 rounded-xl text-xs sm:text-sm shadow-sm">
-              <p className="font-bold text-amber-900 mb-1.5">
+            <div className="bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/50 text-amber-950 dark:text-amber-100 p-4 rounded-xl text-xs sm:text-sm shadow-card">
+              <p className="font-bold text-amber-900 dark:text-amber-200 mb-1.5">
                 Ghi chú từ server:
               </p>
               <ul className="list-disc pl-4 space-y-1">
                 {result.warnings.map((w, idx) => (
-                  <li key={idx} className="text-amber-900 leading-relaxed">
+                  <li key={idx} className="text-amber-900 dark:text-amber-200 leading-relaxed">
                     {w}
                   </li>
                 ))}
@@ -331,100 +342,104 @@ export default function HomePage() {
 
           {/* So sánh trước / sau */}
           <section className="space-y-3">
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+            <h2 className="text-lg font-bold text-ink tracking-tight flex items-center gap-2">
+              <span aria-hidden="true" className="h-1 w-6 rounded-full bg-gradient-to-r from-sky-500 to-emerald-500" />
               Bản đã humanize
             </h2>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 bg-white rounded-2xl border border-slate-200/80 p-3.5">
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <span className="text-slate-400">Nguồn kết quả:</span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-semibold bg-sky-100 text-sky-900 border border-sky-200">
-                  {providerLabel}
-                </span>
-                {typeof result.stats?.latency_seconds === "number" && (
-                  <span className="text-slate-400 font-mono">
-                    {result.stats.latency_seconds.toLocaleString("vi-VN")} giây
+            <div className="bg-card rounded-2xl border border-line shadow-card p-3.5 transition-colors">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <span className="text-muted">Nguồn kết quả:</span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-semibold bg-gradient-to-r from-sky-100 to-emerald-100 dark:from-sky-950/60 dark:to-emerald-950/60 text-sky-900 dark:text-sky-200 border border-sky-200 dark:border-sky-800">
+                    {providerLabel}
                   </span>
-                )}
-                {typeof result.stats?.attempts === "number" &&
-                  result.stats.attempts > 1 && (
-                    <span className="text-slate-400 font-mono">
-                      {result.stats.attempts} lần thử
+                  {typeof result.stats?.latency_seconds === "number" && (
+                    <span className="text-muted font-mono">
+                      {result.stats.latency_seconds.toLocaleString("vi-VN")} giây
                     </span>
                   )}
-                {typeof result.stats?.total_issues === "number" && (
-                  <span className="text-slate-400 font-mono">
-                    {result.stats.total_issues} vấn đề phát hiện
-                    {typeof result.stats.fixed === "number" && `, đã sửa ${result.stats.fixed}`}
-                  </span>
-                )}
+                  {typeof result.stats?.attempts === "number" &&
+                    result.stats.attempts > 1 && (
+                      <span className="text-muted font-mono">
+                        {result.stats.attempts} lần thử
+                      </span>
+                    )}
+                  {typeof result.stats?.total_issues === "number" && (
+                    <span className="text-muted font-mono">
+                      {result.stats.total_issues} vấn đề phát hiện
+                      {typeof result.stats.fixed === "number" && `, đã sửa ${result.stats.fixed}`}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {editing ? (
+                    <button
+                      type="button"
+                      onClick={handleSaveEdit}
+                      className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs font-bold rounded-xl shadow-glow-sm transition-all active:scale-[0.98]"
+                    >
+                      Lưu chỉnh sửa
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleStartEdit}
+                      className="px-4 py-2 bg-card hover:bg-soft border border-line text-ink text-xs font-bold rounded-xl shadow-sm transition-all active:scale-[0.98]"
+                    >
+                      Sửa thủ công
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleUndo}
+                    disabled={lastResultBeforeEdit === null}
+                    title={
+                      lastResultBeforeEdit === null
+                        ? "Không có gì để hoàn tác"
+                        : "Khôi phục giá trị trước đó"
+                    }
+                    className="px-4 py-2 bg-card hover:bg-soft border border-line text-ink text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+                  >
+                    Hoàn tác
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="px-4 py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white text-xs font-bold rounded-xl shadow-sm transition-all active:scale-[0.98]"
+                  >
+                    {copied ? "Đã sao chép ✓" : "Sao chép"}
+                  </button>
+                </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                {editing ? (
-                  <button
-                    type="button"
-                    onClick={handleSaveEdit}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all"
+              {editing && (
+                <div className="mt-3.5 bg-soft rounded-xl border border-sky-200/80 dark:border-sky-800/60 p-3.5 animate-fade-in">
+                  <label
+                    htmlFor="manual-edit-input"
+                    className="block text-xs font-bold text-muted uppercase tracking-wider font-mono mb-2"
                   >
-                    Lưu chỉnh sửa
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleStartEdit}
-                    className="px-4 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-sm transition-all"
-                  >
-                    Sửa thủ công
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={handleUndo}
-                  disabled={lastResultBeforeEdit === null}
-                  title={
-                    lastResultBeforeEdit === null
-                      ? "Không có gì để hoàn tác"
-                      : "Khôi phục giá trị trước đó"
-                  }
-                  className="px-4 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  Hoàn tác
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all"
-                >
-                  {copied ? "Đã sao chép ✓" : "Sao chép"}
-                </button>
-              </div>
+                    Sửa trực tiếp bản đã humanize
+                  </label>
+                  <textarea
+                    id="manual-edit-input"
+                    rows={10}
+                    value={draftText}
+                    onChange={(e) => setDraftText(e.target.value)}
+                    className="w-full p-4 bg-card border border-line rounded-xl text-sm leading-relaxed text-ink focus:outline-none focus:ring-2 focus:ring-sky-500/30 dark:focus:ring-sky-400/30 focus:border-sky-500 dark:focus:border-sky-400 font-sans transition-all resize-y shadow-inner"
+                  />
+                </div>
+              )}
             </div>
-
-            {editing && (
-              <div className="bg-white rounded-2xl border border-sky-200/80 p-3.5">
-                <label
-                  htmlFor="manual-edit-input"
-                  className="block text-xs font-bold text-slate-500 uppercase tracking-wider font-mono mb-2"
-                >
-                  Sửa trực tiếp bản đã humanize
-                </label>
-                <textarea
-                  id="manual-edit-input"
-                  rows={10}
-                  value={draftText}
-                  onChange={(e) => setDraftText(e.target.value)}
-                  className="w-full p-4 border border-slate-200 rounded-xl shadow-inner text-sm leading-relaxed text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 font-sans transition-all resize-y"
-                />
-              </div>
-            )}
 
             <CompareView originalText={originalText} currentText={currentText} />
           </section>
 
           {/* Gợi ý rà soát */}
           <section className="space-y-3">
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+            <h2 className="text-lg font-bold text-ink tracking-tight flex items-center gap-2">
+              <span aria-hidden="true" className="h-1 w-6 rounded-full bg-gradient-to-r from-sky-500 to-emerald-500" />
               Gợi ý rà soát
             </h2>
             <SuggestionsPanel suggestions={result.suggestions} />

@@ -78,8 +78,8 @@ export function CapabilityNav() {
         href="/"
         className={
           capabilities.humanize === true
-            ? "px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-semibold shadow-sm shadow-sky-600/20 transition-all"
-            : "px-3 py-1.5 rounded-lg text-slate-600 hover:text-sky-600 hover:bg-slate-100/80 transition-all"
+            ? "px-3 py-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-sky-500 hover:from-sky-500 hover:to-emerald-500 text-white font-semibold shadow-glow-sm active:scale-[0.98] transition-all"
+            : "px-3 py-1.5 rounded-lg text-muted hover:text-ink hover:bg-soft active:scale-[0.98] transition-all"
         }
       >
         Humanize văn bản
@@ -87,7 +87,7 @@ export function CapabilityNav() {
       {capabilities.contributions && (
         <Link
           href="/contribute"
-          className="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-semibold shadow-sm shadow-sky-600/20 active:scale-[0.98] transition-all flex items-center space-x-1.5"
+          className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg font-semibold shadow-glow-sm active:scale-[0.98] transition-all flex items-center space-x-1.5"
         >
           <svg
             className="w-4 h-4"

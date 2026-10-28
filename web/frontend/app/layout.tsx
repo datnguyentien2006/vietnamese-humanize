@@ -3,7 +3,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import React from "react";
 import { CapabilityNav, CapabilityProvider } from "../components/CapabilityNav";
+import { ThemeToggle } from "../components/ThemeToggle";
 import "./globals.css";
+
+/** Đặt theme tối/sớm trước khi hydrate để tránh nhấp nháy giao diện. */
+const themeInitScript = `(function(){try{var t=localStorage.getItem('vh-theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})()`;
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vietnamese-humanizer-g1o9.vercel.app";
 
@@ -101,46 +105,58 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi">
+    <html lang="vi" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="min-h-[100dvh] flex flex-col bg-slate-50/60 text-slate-900 font-sans antialiased selection:bg-sky-100 selection:text-sky-900">
+      <body className="min-h-[100dvh] flex flex-col bg-page text-ink font-sans antialiased selection:bg-sky-100 selection:text-sky-900 dark:selection:bg-sky-900 dark:selection:text-sky-100">
+        {/* Nền aurora trang trí — thuần CSS, không tương tác */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+        >
+          <div className="absolute -top-40 -left-32 h-[26rem] w-[26rem] rounded-full bg-sky-400/20 dark:bg-sky-500/10 blur-3xl animate-float" />
+          <div className="absolute top-1/3 -right-40 h-[30rem] w-[30rem] rounded-full bg-emerald-400/15 dark:bg-emerald-500/10 blur-3xl animate-float-slow" />
+          <div className="absolute -bottom-24 left-1/3 h-96 w-96 rounded-full bg-violet-400/10 dark:bg-violet-500/10 blur-3xl" />
+        </div>
         <CapabilityProvider>
           {/* Frosted Glass Header */}
-          <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-slate-200/80 transition-all">
+          <header className="sticky top-0 z-50 glass border-x-0 border-t-0 transition-all">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
               <Link href="/" className="flex items-center space-x-3 group">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 via-sky-500 to-emerald-500 flex items-center justify-center text-white shadow-sm shadow-sky-500/20 group-hover:scale-105 transition-transform">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 via-sky-500 to-emerald-500 flex items-center justify-center text-white shadow-glow-sm group-hover:scale-105 group-active:scale-95 transition-transform">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                  <span className="font-extrabold text-slate-900 tracking-tight text-base sm:text-lg group-hover:text-sky-600 transition-colors">
+                  <span className="font-extrabold text-ink tracking-tight text-base sm:text-lg group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
                     Vietnamese Writing Skills
                   </span>
                 </div>
               </Link>
 
-              <CapabilityNav />
+              <div className="flex items-center gap-2.5">
+                <CapabilityNav />
+                <ThemeToggle />
+              </div>
             </div>
           </header>
 
-          {/* Main Content Area */}
           <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {children}
           </main>
 
           {/* Footer */}
-          <footer className="bg-white border-t border-slate-200/80 py-8 mt-16 text-center text-xs text-slate-500">
+          <footer className="glass border-x-0 border-b-0 py-8 mt-16 text-center text-xs text-muted">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-              <p className="text-slate-400 max-w-2xl text-center md:text-right">
+              <p className="text-muted max-w-2xl text-center md:text-right">
                 Công cụ nhận diện tín hiệu văn phong cho người viết và biên tập viên. Không chấm điểm xác suất AI, không suy đoán tác giả.
               </p>
             </div>
