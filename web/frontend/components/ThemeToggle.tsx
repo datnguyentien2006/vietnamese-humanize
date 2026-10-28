@@ -57,25 +57,18 @@ export function ThemeToggle() {
       onClick={toggle}
       aria-label={dark ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"}
       title={dark ? "Giao diện sáng" : "Giao diện tối"}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-card text-muted hover:text-ink hover:border-sky-300 dark:hover:border-sky-700 hover:shadow-sm active:scale-95 transition-all"
+      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-card text-muted hover:text-ink hover:border-green-400 dark:hover:border-green-700 hover:shadow-sm active:scale-95 transition-all"
     >
       {dark ? (
         // Mặt trời — đang ở giao diện tối, bấm để quay lại sáng
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
-          />
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.4 5.4l1.4 1.4M17.2 17.2l1.4 1.4M5.4 18.6l1.4-1.4M17.2 6.8l1.4-1.4" />
         </svg>
       ) : (
         // Mặt trăng — đang ở giao diện sáng, bấm để chuyển sang tối
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998z"
-          />
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinejoin="round">
+          <path d="M20.25 14.15A8.25 8.25 0 0 1 9.85 3.75a8.25 8.25 0 1 0 10.4 10.4z" />
         </svg>
       )}
     </button>

@@ -34,8 +34,8 @@ const config: Config = {
       boxShadow: {
         card: "0 1px 2px 0 rgb(15 23 42 / 0.04), 0 8px 24px -12px rgb(15 23 42 / 0.10)",
         lift: "0 2px 4px 0 rgb(15 23 42 / 0.05), 0 16px 40px -14px rgb(15 23 42 / 0.16)",
-        glow: "0 10px 36px -10px rgb(2 132 199 / 0.50)",
-        "glow-sm": "0 4px 16px -6px rgb(2 132 199 / 0.45)",
+        glow: "0 10px 36px -10px rgb(22 163 74 / 0.50)",
+        "glow-sm": "0 4px 16px -6px rgb(22 163 74 / 0.45)",
       },
       keyframes: {
         "fade-up": {

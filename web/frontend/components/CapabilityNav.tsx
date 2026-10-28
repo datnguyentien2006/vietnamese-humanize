@@ -78,7 +78,7 @@ export function CapabilityNav() {
         href="/"
         className={
           capabilities.humanize === true
-            ? "px-3 py-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-sky-500 hover:from-sky-500 hover:to-emerald-500 text-white font-semibold shadow-glow-sm active:scale-[0.98] transition-all"
+            ? "px-3 py-1.5 rounded-lg bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-500 hover:to-teal-400 text-white font-semibold shadow-glow-sm active:scale-[0.98] transition-all"
             : "px-3 py-1.5 rounded-lg text-muted hover:text-ink hover:bg-soft active:scale-[0.98] transition-all"
         }
       >
@@ -87,17 +87,17 @@ export function CapabilityNav() {
       {capabilities.contributions && (
         <Link
           href="/contribute"
-          className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg font-semibold shadow-glow-sm active:scale-[0.98] transition-all flex items-center space-x-1.5"
+          className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white rounded-lg font-semibold shadow-glow-sm active:scale-[0.98] transition-all flex items-center space-x-1.5"
         >
           <svg
             className="w-4 h-4"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
-            strokeWidth={2.5}
+            strokeWidth={2}
             aria-hidden="true"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
           </svg>
           <span>Góp mẫu văn bản</span>
         </Link>

@@ -43,12 +43,12 @@ body {
 }
 
 ::selection {
-  background-color: #e0f2fe;
-  color: #0369a1;
+  background-color: #dcfce7;
+  color: #166534;
 }
 .dark ::selection {
-  background-color: #0c4a6e;
-  color: #e0f2fe;
+  background-color: #14532d;
+  color: #dcfce7;
 }
 
 /* Custom scrollbar for textareas & code windows */
@@ -76,10 +76,10 @@ body {
 @layer utilities {
   /* Chữ gradient nhấn cho tiêu đề hero / nhãn quan trọng */
   .text-gradient {
-    @apply bg-gradient-to-r from-sky-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-green-600 via-emerald-500 to-teal-400 bg-clip-text text-transparent;
   }
   .dark .text-gradient {
-    @apply from-sky-400 via-sky-300 to-emerald-400;
+    @apply from-green-400 via-emerald-300 to-teal-300;
   }
 
   /* Bề mặt kính mờ cho header / toolbar */
@@ -90,6 +90,6 @@ body {
 
   /* Thanh kẻ nhấn phía trên các section tiêu đề */
   .accent-bar {
-    @apply inline-block h-1 w-6 rounded-full bg-gradient-to-r from-sky-500 to-emerald-500 align-middle;
+    @apply inline-block h-1 w-6 rounded-full bg-gradient-to-r from-green-500 to-teal-500 align-middle;
   }
 }

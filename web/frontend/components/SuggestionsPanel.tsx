@@ -89,14 +89,18 @@ const SuggestionItem: React.FC<SuggestionItemProps> = ({ suggestion }) => {
           className="inline-flex items-center gap-1 text-[11px] text-muted hover:text-ink font-semibold transition-colors"
         >
           <svg
-            className={`w-3 h-3 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+            className="w-3 h-3"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
-            strokeWidth={2.5}
+            strokeWidth={2}
             aria-hidden="true"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            {open ? (
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            )}
           </svg>
           {open ? "Ẩn" : "Hiện"}
         </button>
@@ -138,7 +142,7 @@ const SuggestionItem: React.FC<SuggestionItemProps> = ({ suggestion }) => {
                   key={i}
                   className={
                     i < suggestion.confidence
-                      ? "h-1.5 w-1.5 rounded-full bg-sky-500 dark:bg-sky-400"
+                      ? "h-1.5 w-1.5 rounded-full bg-green-500 dark:bg-green-400"
                       : "h-1.5 w-1.5 rounded-full bg-line"
                   }
                 />
