@@ -30,6 +30,7 @@ import argparse
 import gzip
 import hashlib
 import json
+import os
 import random
 import re
 import sys
@@ -500,7 +501,13 @@ def run_synthesize(cfg: dict, seed: int = 42, out_dir_arg: str | None = None) ->
         print(f"[info] teacher: {config.model} @ {config.base_url}")
         teacher = make_teacher(config)
         if syn.get("teacher_cache", True):
-            cache_path = ROOT / "training" / "data" / "sft" / "teacher_cache.jsonl"
+            # Cho phép chọn cache riêng qua TEACHER_CACHE: cần thiết khi chạy
+            # NHIỀU teacher khác nhau (cache key = severity|text, không gồm
+            # model — dùng chung cache sẽ không bao giờ gọi teacher mới).
+            cache_path = Path(
+                os.environ.get("TEACHER_CACHE")
+                or (ROOT / "training" / "data" / "sft" / "teacher_cache.jsonl")
+            )
             teacher = _cached_teacher(teacher, cache_path)
             print(f"[info] teacher cache: {cache_path.as_posix()} (rerun/crash không tốn call)")
 

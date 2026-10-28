@@ -143,3 +143,30 @@ humanize (nếu vượt, backend sẽ báo lỗi fact-check hoặc rơi về Gro
 | Model trả lời chậm bất thường (>30s/đoạn) | `ollama ps` xem cột PROCESSOR; nếu CPU > 30% → giảm `num_ctx` xuống 2048 trong Modelfile rồi `ollama create` lại |
 | `Error: ... command must be one of` khi create | Modelfile dùng `PARAMETER stop` (không phải `STOP`) |
 | Output bị cắt cụt | tăng `PARAMETER num_ctx` hoặc chia nhỏ văn bản đầu vào |
+
+---
+
+## 10. Tối ưu VRAM: IQ4_XS (28/10/2026) — ĐÃ ÁP DỤNG
+
+**Vấn đề:** Q4_K_M (4,36 GB) + KV + buffer = 4,9 GB > ~5,2 GB khả dụng của RTX 4050 6 GB
+→ llama.cpp đẩy 13% lớp ra CPU → tốc độ rơi còn ~11 tok/s, đoạn 400–600 từ mất 55s.
+
+**Giải pháp:** export lại từ f16 (Route A) sang **IQ4_XS** — 3,96 GB, vừa VRAM.
+
+| Chỉ số | Q4_K_M | **IQ4_XS** |
+|---|---|---|
+| Kích thước | 4,36 GB | **3,96 GB** |
+| Phân bổ | 13% CPU / 87% GPU | **100% GPU** |
+| Tốc độ | ~11 tok/s | **~41 tok/s** |
+| Đoạn 376 từ (443 token) | ~56s | **~11s** (nhanh 5,1×) |
+| Đoạn ngắn 75 từ qua API | 7–8s | **6,2s** |
+| Fact guard | OK | OK (3/3 lần đo liên tiếp 0 mất) |
+
+**Model:** `humanizer-vi-iq4xs` (Ollama). Bản cũ `humanizer-vi` (Q4_K_M) vẫn giữ để so sánh.
+
+**Lưu ý vận hành:** backend và teacher dùng chung Ollama với `OLLAMA_MAX_LOADED_MODELS=1`
+(VRAM 6 GB không chứa nổi 2 model 4+ GB). Khi bạn dùng web app, teacher sẽ tạm đổi model
+(~30–60s) rồi tự chạy tiếp — cache đảm bảo không mất call.
+
+**Tái tạo IQ4_XS:** kernel `mytham/humanizer-vi-export` (notebook, CPU) — merge fp16 → convert
+f16 → `llama-quantize ... IQ4_XS` (~21 phút quantize trên 4 vCPU; tổng ~7,5h gồm imatrix).

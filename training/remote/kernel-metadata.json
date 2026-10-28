@@ -1,17 +1,23 @@
 {
-  "id": "mytham/humanizer-vi-train",
-  "title": "humanizer-vi-train",
-  "code_file": "humanizer_colab.ipynb",
-  "language": "python",
-  "kernel_type": "notebook",
-  "is_private": true,
-  "enable_gpu": true,
-  "enable_tpu": false,
-  "enable_internet": true,
-  "dataset_sources": [
-    "mytham/vi-humanizer-corpus"
-  ],
-  "kernel_sources": [],
-  "competition_sources": [],
-  "model_sources": []
+    "id":  "mytham/humanizer-vi-train",
+    "title":  "humanizer-vi-train",
+    "code_file":  "humanizer_colab.ipynb",
+    "language":  "python",
+    "kernel_type":  "notebook",
+    "is_private":  true,
+    "enable_gpu":  true,
+    "enable_tpu":  false,
+    "enable_internet":  true,
+    "dataset_sources":  [
+                            "mytham/vi-humanizer-v21"
+                        ],
+    "kernel_sources":  [
+
+                       ],
+    "competition_sources":  [
+
+                            ],
+    "model_sources":  [
+
+                      ]
 }

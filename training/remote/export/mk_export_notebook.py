@@ -22,13 +22,13 @@ def cell(kind: str, src: str) -> dict:
 cells = [
     cell(
         "markdown",
-        """# Export humanizer adapter → GGUF Q4_K_M
+        """# Export humanizer adapter → GGUF IQ4_XS
 
 Merge adapter (từ kernel `humanizer-vi-train`) vào base Qwen2.5-7B-Instruct rồi
-quantize Q4_K_M (~4,4 GB) để chạy Ollama trên GPU 6 GB.
+quantize IQ4_XS (~4,4 GB) để chạy Ollama trên GPU 6 GB.
 
 **5 cell, chạy từ trên xuống** — mỗi cell in tiến trình nên Logs hiện realtime.
-Đầu ra cuối cùng: `humanizer-7b-Q4_K_M.gguf` + `Modelfile` trong `/kaggle/working`.""",
+Đầu ra cuối cùng: `humanizer-7b-IQ4_XS.gguf` + `Modelfile` trong `/kaggle/working`.""",
     ),
     cell(
         "code",
@@ -106,13 +106,13 @@ print(f"[convert] xong sau {time.time()-t0:.0f}s · {os.path.getsize(GGUF_F16)/1
     ),
     cell(
         "code",
-        """# ==== 4. Quantize Q4_K_M + Modelfile Ollama + dọn /tmp ====
+        """# ==== 4. Quantize IQ4_XS + Modelfile Ollama + dọn /tmp ====
 import glob, json, os, shutil, subprocess, urllib.request, zipfile
 
 TMP = "/tmp"
 WORK = "/kaggle/working"
 GGUF_F16 = f"{TMP}/model-f16.gguf"
-GGUF_Q4 = f"{WORK}/humanizer-7b-Q4_K_M.gguf"
+GGUF_Q4 = f"{WORK}/humanizer-7b-IQ4_XS.gguf"
 
 api = urllib.request.Request(
     "https://api.github.com/repos/ggml-org/llama.cpp/releases/latest",
@@ -136,7 +136,7 @@ else:
     qbin = f"{TMP}/build/bin/llama-quantize"
 
 print("[quantize] bắt đầu (5-15 phút) ...", flush=True)
-subprocess.run([qbin, GGUF_F16, GGUF_Q4, "Q4_K_M"], cwd=WORK, check=True, env=env)
+subprocess.run([qbin, GGUF_F16, GGUF_Q4, "IQ4_XS"], cwd=WORK, check=True, env=env)
 
 with open(f"{WORK}/Modelfile", "w", encoding="utf-8") as fh:
     chat = ('{{ if .System }}<|im_start|>system\\n'
@@ -144,16 +144,19 @@ with open(f"{WORK}/Modelfile", "w", encoding="utf-8") as fh:
             '{{ end }}<|im_start|>user\\n'
             '{{ .Prompt }}<|im_end|>\\n'
             '<|im_start|>assistant\\n')
+    q3 = chr(34) * 3
     fh.write("\\n".join([
-        "FROM ./humanizer-7b-Q4_K_M.gguf",
+        "FROM ./humanizer-7b-IQ4_XS.gguf",
         "",
-        "PARAMETER temperature 0.7",
+        "PARAMETER temperature 0.5",
         "PARAMETER top_p 0.9",
-        "PARAMETER repeat_penalty 1.05",
-        "PARAMETER num_ctx 4096",
+        "PARAMETER repeat_penalty 1.08",
+        "PARAMETER num_ctx 2048",
+        "PARAMETER num_batch 128",
+        'PARAMETER stop "<|im_end|>"',
+        'PARAMETER stop "<|im_start|>"',
         "",
-        'TEMPLATE """' + chat + '"""',
-        'STOP "<|im_end|>"',
+        "TEMPLATE " + q3 + chat + q3,
         "",
     ]))
 
